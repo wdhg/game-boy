@@ -60,12 +60,6 @@ impl GameBoy {
     }
 }
 
-// load register into register
-fn ld_r_r(gb: &mut GameBoy, to: Register8, from: Register8) {
-    let v = gb.read_register8(from);
-    gb.write_register8(to, v);
-}
-
 fn main() {
     let gb = &mut GameBoy::new();
 }
