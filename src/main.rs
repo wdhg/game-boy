@@ -25,7 +25,7 @@ enum Register16 {
 struct GameBoy {
     registers8: HashMap<Register8, u8>,
     registers16: HashMap<Register16, u16>,
-    memory: [u8; MEMORY_SIZE], // TODO reduce size of memory to actual GameBoy size instead of the memory map size
+    memory: [u8; MEMORY_SIZE],
 }
 
 impl GameBoy {
