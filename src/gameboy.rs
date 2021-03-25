@@ -121,6 +121,7 @@ mod tests {
     #[test]
     fn test_decode() {
         use Instr::*;
+
         assert_eq!(decode(0x00), NOP);
     }
 }
