@@ -13,8 +13,8 @@ pub enum Instr {
 
 use Instr::*;
 
-pub fn decode(opcode: (u8, u8)) -> Instr {
-    match opcode {
+pub fn decode(opcode: u8, opcode_extra: u8) -> Instr {
+    match (opcode, opcode_extra) {
         (0x00, _) => NOP,
         (0x27, _) => DAA,
         (0x2F, _) => CPL,
@@ -34,9 +34,9 @@ mod tests {
 
     #[test]
     fn test_decode() {
-        assert_eq!(decode((0x00, 0x00)), NOP);
-        assert_eq!(decode((0x27, 0x00)), DAA);
-        assert_eq!(decode((0x76, 0x00)), HALT);
-        assert_eq!(decode((0x10, 0x00)), STOP);
+        assert_eq!(decode(0x00, 0x00), NOP);
+        assert_eq!(decode(0x27, 0x00), DAA);
+        assert_eq!(decode(0x76, 0x00), HALT);
+        assert_eq!(decode(0x10, 0x00), STOP);
     }
 }
