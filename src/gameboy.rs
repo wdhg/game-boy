@@ -7,7 +7,7 @@ const INITIAL_PC: u16 = 0x100;
 const INITIAL_SP: u16 = 0xfff;
 
 #[derive(PartialEq, Eq, Hash)]
-enum Register8 {
+enum Reg8 {
     A,
     B,
     C,
@@ -19,43 +19,43 @@ enum Register8 {
 }
 
 #[derive(PartialEq, Eq, Hash)]
-enum Register16 {
+enum Reg16 {
     SP,
     PC,
 }
 
 pub struct GameBoy {
     pub memory: [u8; MEMORY_SIZE],
-    registers8: HashMap<Register8, u8>,
-    registers16: HashMap<Register16, u16>,
+    registers8: HashMap<Reg8, u8>,
+    registers16: HashMap<Reg16, u16>,
 }
 
 impl GameBoy {
     pub fn new() -> GameBoy {
         return GameBoy {
             registers8: maplit::hashmap! {
-                Register8::A => 0,
-                Register8::B => 0,
-                Register8::C => 0,
-                Register8::D => 0,
-                Register8::E => 0,
-                Register8::F => 0,
-                Register8::H => 0,
-                Register8::L => 0,
+                Reg8::A => 0,
+                Reg8::B => 0,
+                Reg8::C => 0,
+                Reg8::D => 0,
+                Reg8::E => 0,
+                Reg8::F => 0,
+                Reg8::H => 0,
+                Reg8::L => 0,
             },
             registers16: maplit::hashmap! {
-                Register16::PC => INITIAL_PC,
-                Register16::SP => INITIAL_SP,
+                Reg16::PC => INITIAL_PC,
+                Reg16::SP => INITIAL_SP,
             },
             memory: [0; MEMORY_SIZE],
         };
     }
 
-    pub fn read_register8(&self, r: Register8) -> u8 {
+    pub fn read_register8(&self, r: Reg8) -> u8 {
         return self.registers8.get(&r).copied().unwrap_or_default();
     }
 
-    pub fn write_register8(&mut self, r: Register8, v: u8) {
+    pub fn write_register8(&mut self, r: Reg8, v: u8) {
         self.registers8.entry(r).and_modify(|e| *e = v).or_default();
     }
 }
