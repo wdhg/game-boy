@@ -1,5 +1,6 @@
 mod gameboy;
+use gameboy::GameBoy;
 
 fn main() {
-    let gb = &mut gameboy::GameBoy::new();
+    let gb = &mut GameBoy::new();
 }
