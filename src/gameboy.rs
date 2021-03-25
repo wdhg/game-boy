@@ -25,9 +25,9 @@ enum Register16 {
 }
 
 pub struct GameBoy {
+    pub memory: [u8; MEMORY_SIZE],
     registers8: HashMap<Register8, u8>,
     registers16: HashMap<Register16, u16>,
-    memory: [u8; MEMORY_SIZE],
 }
 
 impl GameBoy {
