@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 extern crate maplit;
+use maplit::hashmap;
 
 const MEMORY_SIZE: usize = 0x10000;
 const INITIAL_PC: u16 = 0x100;
@@ -33,7 +34,7 @@ pub struct GameBoy {
 impl GameBoy {
     pub fn new() -> GameBoy {
         return GameBoy {
-            registers8: maplit::hashmap! {
+            registers8: hashmap! {
                 Reg8::A => 0,
                 Reg8::B => 0,
                 Reg8::C => 0,
@@ -43,7 +44,7 @@ impl GameBoy {
                 Reg8::H => 0,
                 Reg8::L => 0,
             },
-            registers16: maplit::hashmap! {
+            registers16: hashmap! {
                 Reg16::PC => INITIAL_PC,
                 Reg16::SP => INITIAL_SP,
             },
@@ -69,16 +70,6 @@ impl GameBoy {
             .and_modify(|e| *e = v)
             .or_default();
     }
-}
-
-#[derive(Debug, PartialEq)]
-pub enum Instr {
-    NOP,
-}
-
-pub fn decode(opcode: u8) -> Instr {
-    use Instr::*;
-    return NOP;
 }
 
 #[cfg(test)]
@@ -116,12 +107,5 @@ mod tests {
 
         assert_eq!(gb.read_register16(PC), 0xabcd);
         assert_eq!(gb.read_register16(SP), 0xef01);
-    }
-
-    #[test]
-    fn test_decode() {
-        use Instr::*;
-
-        assert_eq!(decode(0x00), NOP);
     }
 }
