@@ -7,7 +7,7 @@ const INITIAL_PC: u16 = 0x100;
 const INITIAL_SP: u16 = 0xfff;
 
 #[derive(PartialEq, Eq, Hash)]
-enum Reg8 {
+pub enum Reg8 {
     A,
     B,
     C,
@@ -19,7 +19,7 @@ enum Reg8 {
 }
 
 #[derive(PartialEq, Eq, Hash)]
-enum Reg16 {
+pub enum Reg16 {
     SP,
     PC,
 }
@@ -57,5 +57,26 @@ impl GameBoy {
 
     pub fn write_register8(&mut self, r: Reg8, v: u8) {
         self.registers8.entry(r).and_modify(|e| *e = v).or_default();
+    }
+}
+
+#[derive(Debug, PartialEq)]
+pub enum Instr {
+    NOP,
+}
+
+pub fn decode(opcode: u8) -> Instr {
+    use Instr::*;
+    return NOP;
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_decode() {
+        use Instr::*;
+        assert_eq!(decode(0x00), NOP);
     }
 }
