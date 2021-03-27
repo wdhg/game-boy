@@ -12,9 +12,11 @@ pub enum Instr {
     STOP, // halt CPU and LCD display until button pressed
     DI,   // disables interrupts
     EI,   // enables interrupts
+
     // 8-bit load instructions
     LDrr(Reg8, Reg8), // load to first register to from second register
     LDrn(Reg8),       // load value n into register. n is the next byte
+    LDrHL(Reg8),      // load value stored in at the address (HL) into register
 }
 
 use Instr::*;
@@ -26,8 +28,13 @@ fn read_ld_r_r(opcode: u8) -> Instr {
 }
 
 fn read_ld_r_n(opcode: u8) -> Instr {
-    let from = (opcode >> 3) & 0b111;
-    return LDrn(Reg8::from_index(from));
+    let to = (opcode >> 3) & 0b111;
+    return LDrn(Reg8::from_index(to));
+}
+
+fn read_ld_r_hl(opcode: u8) -> Instr {
+    let to = (opcode >> 3) & 0b111;
+    return LDrHL(Reg8::from_index(to));
 }
 
 pub fn decode(opcode: u8, opcode_extra: u8) -> Instr {
@@ -41,8 +48,9 @@ pub fn decode(opcode: u8, opcode_extra: u8) -> Instr {
         (0x10, 0x00) => STOP,
         (0xf3, _) => DI,
         (0xfb, _) => EI,
-        (o, _) if o & 0b11000000 == 0x40 => read_ld_r_r(o),
-        (o, _) if o & 0b11000111 == 0x06 => read_ld_r_n(o),
+        (o, _) if o & 0b11000111 == 0b00000110 => read_ld_r_n(o),
+        (o, _) if o & 0b11000111 == 0b01000110 => read_ld_r_hl(o),
+        (o, _) if o & 0b11000000 == 0b01000000 => read_ld_r_r(o),
         _ => panic!("Illegal opcode {:#02x} {:#02x}", opcode, opcode_extra),
     }
 }
@@ -61,6 +69,9 @@ mod tests {
         assert_eq!(decode(0x10, 0x00), STOP);
         assert_eq!(decode(0x41, 0x00), LDrr(B, C));
         assert_eq!(decode(0x6c, 0x00), LDrr(L, H));
+        assert_eq!(decode(0x06, 0x00), LDrn(B));
         assert_eq!(decode(0x1e, 0x00), LDrn(E));
+        assert_eq!(decode(0x46, 0x00), LDrHL(B));
+        assert_eq!(decode(0x5e, 0x00), LDrHL(E));
     }
 }
