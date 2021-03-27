@@ -24,13 +24,13 @@ impl Reg8 {
         use Reg8::*;
         // i is 3 bits long
         match i {
-            0x0 => B,
-            0x1 => C,
-            0x2 => D,
-            0x3 => E,
-            0x4 => H,
-            0x5 => L,
-            0x7 => A,
+            0b000 => B, // 0
+            0b001 => C, // 1
+            0b010 => D, // 2
+            0b011 => E, // 3
+            0b100 => H, // 4
+            0b101 => L, // 5
+            0b111 => A, // 7
             _ => panic!("Illegal 8-bit register index {}", i),
         }
     }
