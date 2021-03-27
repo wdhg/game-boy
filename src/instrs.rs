@@ -18,6 +18,7 @@ pub enum Instr {
     LDrn(Reg8),       // load value n into register. n is the next byte
     LDrHL(Reg8),      // load value stored at the address (HL) into register
     LDHLr(Reg8),      // load value stored in register to the address (HL)
+    LDHLn,            // load value n to the address (HL). n is the next byte
 }
 
 use Instr::*;
@@ -54,6 +55,7 @@ pub fn decode(opcode: u8, opcode_extra: u8) -> Instr {
         (0x10, 0x00) => STOP,
         (0xf3, _) => DI,
         (0xfb, _) => EI,
+        (0x36, _) => LDHLn,
         (o, _) if o & 0b11000111 == 0b00000110 => read_ld_r_n(o),
         (o, _) if o & 0b11000111 == 0b01000110 => read_ld_r_hl(o),
         (o, _) if o & 0b11111000 == 0b01110000 => read_ld_hl_r(o),
@@ -74,6 +76,7 @@ mod tests {
         assert_eq!(decode(0x27, 0x00), DAA);
         assert_eq!(decode(0x76, 0x00), HALT);
         assert_eq!(decode(0x10, 0x00), STOP);
+        assert_eq!(decode(0x36, 0x00), LDHLn);
         assert_eq!(decode(0x41, 0x00), LDrr(B, C));
         assert_eq!(decode(0x6c, 0x00), LDrr(L, H));
         assert_eq!(decode(0x06, 0x00), LDrn(B));
