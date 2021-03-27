@@ -16,7 +16,8 @@ pub enum Instr {
     // 8-bit load instructions
     LDrr(Reg8, Reg8), // load to first register to from second register
     LDrn(Reg8),       // load value n into register. n is the next byte
-    LDrHL(Reg8),      // load value stored in at the address (HL) into register
+    LDrHL(Reg8),      // load value stored at the address (HL) into register
+    LDHLr(Reg8),      // load value stored in register to the address (HL)
 }
 
 use Instr::*;
@@ -37,6 +38,11 @@ fn read_ld_r_hl(opcode: u8) -> Instr {
     return LDrHL(Reg8::from_index(to));
 }
 
+fn read_ld_hl_r(opcode: u8) -> Instr {
+    let from = opcode & 0b111;
+    return LDHLr(Reg8::from_index(from));
+}
+
 pub fn decode(opcode: u8, opcode_extra: u8) -> Instr {
     match (opcode, opcode_extra) {
         (0x00, _) => NOP,
@@ -50,6 +56,7 @@ pub fn decode(opcode: u8, opcode_extra: u8) -> Instr {
         (0xfb, _) => EI,
         (o, _) if o & 0b11000111 == 0b00000110 => read_ld_r_n(o),
         (o, _) if o & 0b11000111 == 0b01000110 => read_ld_r_hl(o),
+        (o, _) if o & 0b11111000 == 0b01110000 => read_ld_hl_r(o),
         (o, _) if o & 0b11000000 == 0b01000000 => read_ld_r_r(o),
         _ => panic!("Illegal opcode {:#02x} {:#02x}", opcode, opcode_extra),
     }
@@ -73,5 +80,7 @@ mod tests {
         assert_eq!(decode(0x1e, 0x00), LDrn(E));
         assert_eq!(decode(0x46, 0x00), LDrHL(B));
         assert_eq!(decode(0x5e, 0x00), LDrHL(E));
+        assert_eq!(decode(0x70, 0x00), LDHLr(B));
+        assert_eq!(decode(0x77, 0x00), LDHLr(A));
     }
 }
