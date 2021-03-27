@@ -7,7 +7,7 @@ const MEMORY_SIZE: usize = 0x10000;
 const INITIAL_PC: u16 = 0x100;
 const INITIAL_SP: u16 = 0xfff;
 
-#[derive(PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Reg8 {
     A,
     B,
@@ -19,7 +19,24 @@ pub enum Reg8 {
     L,
 }
 
-#[derive(PartialEq, Eq, Hash)]
+impl Reg8 {
+    pub fn from_index(i: u8) -> Reg8 {
+        use Reg8::*;
+        // i is 3 bits long
+        match i {
+            0x0 => B,
+            0x1 => C,
+            0x2 => D,
+            0x3 => E,
+            0x4 => H,
+            0x5 => L,
+            0x7 => A,
+            _ => panic!("Illegal 8-bit register index {}", i),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Reg16 {
     SP,
     PC,
