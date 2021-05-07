@@ -1,4 +1,4 @@
-# GameBoy Emulator
+# Game Boy Emulator
 
 ## Resources
 
