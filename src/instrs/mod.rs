@@ -336,4 +336,13 @@ mod should {
         assert_eq!(decode(0x23), INC(RR(HL)));
         assert_eq!(decode(0x33), INC(RR(SP)));
     }
+
+    #[test]
+    fn decode_decrementing_16_bit_register() {
+        // DEC rr
+        assert_eq!(decode(0x0b), DEC(RR(BC)));
+        assert_eq!(decode(0x1b), DEC(RR(DE)));
+        assert_eq!(decode(0x2b), DEC(RR(HL)));
+        assert_eq!(decode(0x3b), DEC(RR(SP)));
+    }
 }
