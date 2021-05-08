@@ -40,8 +40,9 @@ pub enum Instr {
     PUSH(Operand),         // push instruction
     POP(Operand),          // pop instruction
     ADD(Operand, Operand), // add instruction
-    ADC(Operand, Operand), // add + carry instruction
+    ADC(Operand, Operand), // add with carry instruction
     SUB(Operand),          // sub instruction
+    SBC(Operand),          // sub with carry instruction
 }
 
 use Instr::*;
@@ -114,9 +115,11 @@ fn decode_arithmetic(opcode: u8) -> Option<Instr> {
         0x8e => Some(ADC(R(A), AddressHL)),
         0x96 => Some(SUB(AddressHL)),
         0xd6 => Some(SUB(N)),
+        0x9e => Some(SBC(AddressHL)),
         o if o & 0b11111000 == 0b10000000 => Some(ADD(R(A), r_from_index(reg8_from))),
         o if o & 0b11111000 == 0b10001000 => Some(ADC(R(A), r_from_index(reg8_from))),
         o if o & 0b11111000 == 0b10010000 => Some(SUB(r_from_index(reg8_from))),
+        o if o & 0b11111000 == 0b10011000 => Some(SBC(r_from_index(reg8_from))),
         _ => None,
     };
 }
@@ -277,7 +280,7 @@ mod should {
     }
 
     #[test]
-    fn decode_adcing_register_to_register_a() {
+    fn decode_adding_register_to_register_a_with_carry() {
         // ADC A, r
         assert_eq!(decode(0x8f), ADC(R(A), R(A)));
         assert_eq!(decode(0x88), ADC(R(A), R(B)));
@@ -285,12 +288,12 @@ mod should {
     }
 
     #[test]
-    fn decode_adcing_address_hl_to_register_a() {
+    fn decode_adding_address_hl_to_register_a_with_carry() {
         assert_eq!(decode(0x8e), ADC(R(A), AddressHL)); // ADC A, (HL)
     }
 
     #[test]
-    fn decode_adcing_n_to_register_a() {
+    fn decode_adding_n_to_register_a_with_carry() {
         assert_eq!(decode(0xce), ADC(R(A), N)); // ADC A, #
     }
 
@@ -310,5 +313,18 @@ mod should {
     #[test]
     fn decode_subtracting_n() {
         assert_eq!(decode(0xd6), SUB(N)); // SUB #
+    }
+
+    #[test]
+    fn decode_subtracting_register_with_carry() {
+        // SBC r
+        assert_eq!(decode(0x98), SBC(R(B)));
+        assert_eq!(decode(0x99), SBC(R(C)));
+        assert_eq!(decode(0x9d), SBC(R(L)));
+    }
+
+    #[test]
+    fn decode_subtracting_address_hl_with_carry() {
+        assert_eq!(decode(0x9e), SBC(AddressHL)); // SBC (HL)
     }
 }
