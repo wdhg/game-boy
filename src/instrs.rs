@@ -62,8 +62,8 @@ fn decode_load(opcode: u8) -> Option<Instr> {
     return match opcode {
         0x0a => Some(LD(R(A), AddressBC)),
         0x1a => Some(LD(R(A), AddressDE)),
-        0x02 => Some(LD(R(A), AddressBC)),
-        0x12 => Some(LD(R(A), AddressDE)),
+        0x02 => Some(LD(AddressBC, R(A))),
+        0x12 => Some(LD(AddressDE, R(A))),
         0xfa => Some(LD(R(A), AddressNN)),
         0xea => Some(LD(AddressNN, R(A))),
         0x36 => Some(LD(AddressHL, N)),
@@ -126,22 +126,22 @@ mod should {
     }
 
     #[test]
-    fn decode_loads_between_r() {
+    fn decode_loads_between_registers() {
         // LD r, r'
         assert_eq!(decode(0x41), LD(R(B), R(C)));
         assert_eq!(decode(0x6c), LD(R(L), R(H)));
     }
 
     #[test]
-    fn decode_loads_between_a_and_joined_r_address() {
+    fn decode_loads_between_register_a_and_joined_registers_address() {
         assert_eq!(decode(0x0a), LD(R(A), AddressBC)); // LD A, (BC)
         assert_eq!(decode(0x1a), LD(R(A), AddressDE)); // LD A, (DE)
-        assert_eq!(decode(0x02), LD(R(A), AddressBC)); // LD (BC), A
-        assert_eq!(decode(0x12), LD(R(A), AddressDE)); // LD (DE), A
+        assert_eq!(decode(0x02), LD(AddressBC, R(A))); // LD (BC), A
+        assert_eq!(decode(0x12), LD(AddressDE, R(A))); // LD (DE), A
     }
 
     #[test]
-    fn decode_loads_between_a_and_address_nn() {
+    fn decode_loads_between_register_a_and_address_nn() {
         assert_eq!(decode(0xfa), LD(R(A), AddressNN)); // LD A, (nn)
         assert_eq!(decode(0xea), LD(AddressNN, R(A))); // LD (nn), A
     }
@@ -160,13 +160,13 @@ mod should {
     }
 
     #[test]
-    fn decode_loads_between_r_and_incremented_address_hl() {
+    fn decode_loads_between_register_a_and_incremented_address_hl() {
         assert_eq!(decode(0x22), LD(AddressHLIncr, R(A))); // LD (HL+), A
         assert_eq!(decode(0x2a), LD(R(A), AddressHLIncr)); // LD A, (HL+)
     }
 
     #[test]
-    fn decode_loads_between_r_and_decremented_address_hl() {
+    fn decode_loads_between_register_a_and_decremented_address_hl() {
         assert_eq!(decode(0x32), LD(AddressHLDecr, R(A))); // LD (HL-), A
         assert_eq!(decode(0x3a), LD(R(A), AddressHLDecr)); // LD A, (HL-)
     }
