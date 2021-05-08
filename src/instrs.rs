@@ -205,16 +205,20 @@ mod should {
 
     #[test]
     fn decode_loads_to_address_nn_from_sp() {
-        assert_eq!(decode(0x08), LD(AddressNN, RR(SP)));
+        assert_eq!(decode(0x08), LD(AddressNN, RR(SP))); // LD (nn), SP
     }
 
     #[test]
     fn decode_loads_to_sp_from_hl() {
-        assert_eq!(decode(0xf9), LD(RR(SP), RR(HL)));
+        assert_eq!(decode(0xf9), LD(RR(SP), RR(HL))); // LD SP, HL
     }
 
     #[test]
     fn decode_pushing_16_bit_register() {
+        // PUSH rr
         assert_eq!(decode(0xc5), PUSH(RR(BC)));
+        assert_eq!(decode(0xd5), PUSH(RR(DE)));
+        assert_eq!(decode(0xe5), PUSH(RR(HL)));
+        assert_eq!(decode(0xf5), PUSH(RR(SP)));
     }
 }
