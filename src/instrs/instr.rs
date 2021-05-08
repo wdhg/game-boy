@@ -2,11 +2,11 @@ use crate::gameboy::{Reg16, Reg8};
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Operand {
-    R(Reg8),       // 8 bit register
+    R8(Reg8),      // 8 bit register
     N,             // 8 bit number following opcode
     AddressN,      // 8 bit address following opcode
     AddressC,      // 8 bit address stored in C
-    RR(Reg16),     // 16 bit register
+    R16(Reg16),    // 16 bit register
     NN,            // 16 bit number following opcode
     AddressNN,     // 16 bit address following opcode
     AddressBC,     // 16 bit address stored in B and C
@@ -17,11 +17,11 @@ pub enum Operand {
 }
 
 pub fn r_from_index(i: u8) -> Operand {
-    return Operand::R(Reg8::from_index(i));
+    return Operand::R8(Reg8::from_index(i));
 }
 
 pub fn rr_from_index(i: u8) -> Operand {
-    return Operand::RR(Reg16::from_index(i));
+    return Operand::R16(Reg16::from_index(i));
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
