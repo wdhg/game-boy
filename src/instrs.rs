@@ -38,6 +38,7 @@ pub enum Instr {
     EI,                    // enables interrupts
     LD(Operand, Operand),  // load instruction
     LDH(Operand, Operand), // load instruction
+    PUSH(Operand),         // push instruction
 }
 
 use Instr::*;
@@ -91,6 +92,7 @@ fn decode_load(opcode: u8) -> Option<Instr> {
             Some(LD(r_from_index(reg8_to), r_from_index(reg8_from)))
         }
         o if o & 0b11001111 == 0b00000001 => Some(LD(rr_from_index(reg16_to), NN)),
+        o if o & 0b11001111 == 0b11000101 => Some(PUSH(rr_from_index(reg16_to))),
         _ => None,
     };
 }
@@ -209,5 +211,10 @@ mod should {
     #[test]
     fn decode_loads_to_sp_from_hl() {
         assert_eq!(decode(0xf9), LD(RR(SP), RR(HL)));
+    }
+
+    #[test]
+    fn decode_pushing_16_bit_register() {
+        assert_eq!(decode(0xc5), PUSH(RR(BC)));
     }
 }
