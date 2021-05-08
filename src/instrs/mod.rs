@@ -1,157 +1,15 @@
-use crate::gameboy::{Reg16, Reg8};
+mod alu;
+pub mod instr;
+mod load;
+mod misc;
 
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub enum Operand {
-    R(Reg8),       // 8 bit register
-    N,             // 8 bit number following opcode
-    AddressN,      // 8 bit address following opcode
-    AddressC,      // 8 bit address stored in C
-    RR(Reg16),     // 16 bit register
-    NN,            // 16 bit number following opcode
-    AddressNN,     // 16 bit address following opcode
-    AddressBC,     // 16 bit address stored in B and C
-    AddressDE,     // 16 bit address stored in D and E
-    AddressHL,     // 16 bit address stored in H and L
-    AddressHLIncr, // 16 bit address stored in H and L, incremented after use
-    AddressHLDecr, // 16 bit address stored in H and L, decremented after use
-}
-
-fn r_from_index(i: u8) -> Operand {
-    return Operand::R(Reg8::from_index(i));
-}
-
-fn rr_from_index(i: u8) -> Operand {
-    return Operand::RR(Reg16::from_index(i));
-}
-
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub enum Instr {
-    NOP,                   // no operation
-    DAA,                   // decimal adjust register A
-    CPL,                   // complement register A (flip all bits)
-    CCF,                   // complement carry flag
-    SCF,                   // set carry flag
-    HALT,                  // power down CPU until an interrupt occurs
-    STOP,                  // halt CPU and LCD display until button pressed
-    DI,                    // disables interrupts
-    EI,                    // enables interrupts
-    LD(Operand, Operand),  // load instruction
-    LDH(Operand, Operand), // load instruction
-    PUSH(Operand),         // push instruction
-    POP(Operand),          // pop instruction
-    ADD(Operand, Operand), // add instruction
-    ADC(Operand, Operand), // add with carry instruction
-    SUB(Operand),          // sub instruction
-    SBC(Operand),          // sub with carry instruction
-    AND(Operand),          // and instruction
-    OR(Operand),           // or instruction
-    XOR(Operand),          // xor instruction
-    CP(Operand),           // compare instruction
-    INC(Operand),          // increment instruction
-    DEC(Operand),          // decrement instruction
-}
-
-use Instr::*;
-
-fn decode_misc(opcode: u8) -> Option<Instr> {
-    return match opcode {
-        0x00 => Some(NOP),
-        0x10 => Some(STOP),
-        0x27 => Some(DAA),
-        0x2f => Some(CPL),
-        0x3f => Some(CCF),
-        0x37 => Some(SCF),
-        0x76 => Some(HALT),
-        0xf3 => Some(DI),
-        0xfb => Some(EI),
-        _ => None,
-    };
-}
-
-fn decode_load(opcode: u8) -> Option<Instr> {
-    use Operand::*;
-    use Reg16::*;
-    use Reg8::*;
-
-    let reg8_to = (opcode >> 3) & 0b111;
-    let reg8_from = opcode & 0b111;
-    let reg16_to = (opcode >> 4) & 0b11;
-
-    return match opcode {
-        0x0a => Some(LD(R(A), AddressBC)),
-        0x1a => Some(LD(R(A), AddressDE)),
-        0x02 => Some(LD(AddressBC, R(A))),
-        0x12 => Some(LD(AddressDE, R(A))),
-        0xfa => Some(LD(R(A), AddressNN)),
-        0xea => Some(LD(AddressNN, R(A))),
-        0x36 => Some(LD(AddressHL, N)),
-        0x22 => Some(LD(AddressHLIncr, R(A))),
-        0x2a => Some(LD(R(A), AddressHLIncr)),
-        0x32 => Some(LD(AddressHLDecr, R(A))),
-        0x3a => Some(LD(R(A), AddressHLDecr)),
-        0xe0 => Some(LDH(AddressN, R(A))),
-        0xe2 => Some(LDH(AddressC, R(A))),
-        0xf0 => Some(LDH(R(A), AddressN)),
-        0xf2 => Some(LDH(R(A), AddressC)),
-        0x08 => Some(LD(AddressNN, RR(SP))),
-        0xf9 => Some(LD(RR(SP), RR(HL))),
-        o if o & 0b11111000 == 0b01110000 => Some(LD(AddressHL, r_from_index(reg8_from))),
-        o if o & 0b11000111 == 0b01000110 => Some(LD(r_from_index(reg8_to), AddressHL)),
-        o if o & 0b11000111 == 0b00000110 => Some(LD(r_from_index(reg8_to), N)),
-        o if o & 0b11000000 == 0b01000000 => {
-            Some(LD(r_from_index(reg8_to), r_from_index(reg8_from)))
-        }
-        o if o & 0b11001111 == 0b00000001 => Some(LD(rr_from_index(reg16_to), NN)),
-        o if o & 0b11001111 == 0b11000101 => Some(PUSH(rr_from_index(reg16_to))),
-        o if o & 0b11001111 == 0b11000001 => Some(POP(rr_from_index(reg16_to))),
-        _ => None,
-    };
-}
-
-fn decode_arithmetic(opcode: u8) -> Option<Instr> {
-    use Operand::*;
-    use Reg8::*;
-
-    let reg8_to = (opcode >> 3) & 0b111;
-    let reg8_from = opcode & 0b111;
-
-    return match opcode {
-        0xc6 => Some(ADD(R(A), N)),
-        0x86 => Some(ADD(R(A), AddressHL)),
-        0xce => Some(ADC(R(A), N)),
-        0x8e => Some(ADC(R(A), AddressHL)),
-        0x96 => Some(SUB(AddressHL)),
-        0xd6 => Some(SUB(N)),
-        0x9e => Some(SBC(AddressHL)),
-        0xa6 => Some(AND(AddressHL)),
-        0xe6 => Some(AND(N)),
-        0xb6 => Some(OR(AddressHL)),
-        0xf6 => Some(OR(N)),
-        0xae => Some(XOR(AddressHL)),
-        0xee => Some(XOR(N)),
-        0xbe => Some(CP(AddressHL)),
-        0xfe => Some(CP(N)),
-        0x34 => Some(INC(AddressHL)),
-        0x35 => Some(DEC(AddressHL)),
-        o if o & 0b11111000 == 0b10000000 => Some(ADD(R(A), r_from_index(reg8_from))),
-        o if o & 0b11111000 == 0b10001000 => Some(ADC(R(A), r_from_index(reg8_from))),
-        o if o & 0b11111000 == 0b10010000 => Some(SUB(r_from_index(reg8_from))),
-        o if o & 0b11111000 == 0b10011000 => Some(SBC(r_from_index(reg8_from))),
-        o if o & 0b11111000 == 0b10100000 => Some(AND(r_from_index(reg8_from))),
-        o if o & 0b11111000 == 0b10110000 => Some(OR(r_from_index(reg8_from))),
-        o if o & 0b11111000 == 0b10101000 => Some(XOR(r_from_index(reg8_from))),
-        o if o & 0b11111000 == 0b10111000 => Some(CP(r_from_index(reg8_from))),
-        o if o & 0b11000111 == 0b00000100 => Some(INC(r_from_index(reg8_to))),
-        o if o & 0b11000111 == 0b00000101 => Some(DEC(r_from_index(reg8_to))),
-        _ => None,
-    };
-}
+use instr::Instr;
 
 #[allow(dead_code)]
 pub fn decode(opcode: u8) -> Instr {
-    let maybe_instr = decode_misc(opcode)
-        .or_else(|| decode_load(opcode))
-        .or_else(|| decode_arithmetic(opcode));
+    let maybe_instr = misc::decode(opcode)
+        .or_else(|| load::decode(opcode))
+        .or_else(|| alu::decode(opcode));
     match maybe_instr {
         Some(i) => return i,
         None => panic!("Illegal opcode {:#02x}", opcode),
@@ -161,7 +19,9 @@ pub fn decode(opcode: u8) -> Instr {
 #[cfg(test)]
 mod should {
     use super::*;
-    use Operand::*;
+    use crate::gameboy::{Reg16, Reg8};
+    use instr::Instr::*;
+    use instr::Operand::*;
     use Reg16::*;
     use Reg8::*;
 
