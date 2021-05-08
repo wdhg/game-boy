@@ -40,6 +40,7 @@ pub enum Instr {
     PUSH(Operand),         // push instruction
     POP(Operand),          // pop instruction
     ADD(Operand, Operand), // add instruction
+    ADC(Operand, Operand), // add + carry instruction
 }
 
 use Instr::*;
@@ -108,7 +109,10 @@ fn decode_arithmetic(opcode: u8) -> Option<Instr> {
     return match opcode {
         0xc6 => Some(ADD(R(A), N)),
         0x86 => Some(ADD(R(A), AddressHL)),
+        0xce => Some(ADC(R(A), N)),
+        0x8e => Some(ADC(R(A), AddressHL)),
         o if o & 0b11111000 == 0b10000000 => Some(ADD(R(A), r_from_index(reg8_from))),
+        o if o & 0b11111000 == 0b10001000 => Some(ADC(R(A), r_from_index(reg8_from))),
         _ => None,
     };
 }
@@ -259,14 +263,30 @@ mod should {
 
     #[test]
     fn decode_adding_address_hl_to_register_a() {
-        // ADD A, (HL)
-        assert_eq!(decode(0x86), ADD(R(A), AddressHL));
+        assert_eq!(decode(0x86), ADD(R(A), AddressHL)); // ADD A, (HL)
     }
 
     #[test]
     fn decode_adding_n_to_register_a() {
         // NOTE i am guessing at what '#' in 'LD A, #' means
-        // ADD A, #
-        assert_eq!(decode(0xc6), ADD(R(A), N));
+        assert_eq!(decode(0xc6), ADD(R(A), N)); // ADD A, #
+    }
+
+    #[test]
+    fn decode_adcing_register_to_register_a() {
+        // ADC A, r
+        assert_eq!(decode(0x8f), ADC(R(A), R(A)));
+        assert_eq!(decode(0x88), ADC(R(A), R(B)));
+        assert_eq!(decode(0x8d), ADC(R(A), R(L)));
+    }
+
+    #[test]
+    fn decode_adcing_address_hl_to_register_a() {
+        assert_eq!(decode(0x8e), ADC(R(A), AddressHL)); // ADC A, (HL)
+    }
+
+    #[test]
+    fn decode_adcing_n_to_register_a() {
+        assert_eq!(decode(0xce), ADC(R(A), N)); // ADC A, #
     }
 }
