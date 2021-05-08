@@ -64,10 +64,8 @@ fn decode_load(opcode: u8) -> Option<Instr> {
         0x1a => Some(LD(R(A), AddressDE)),
         0x02 => Some(LD(R(A), AddressBC)),
         0x12 => Some(LD(R(A), AddressDE)),
-
         0xfa => Some(LD(R(A), AddressNN)),
         0xea => Some(LD(AddressNN, R(A))),
-
         0x36 => Some(LD(AddressHL, N)),
         0x22 => Some(LD(AddressHLIncr, R(A))),
         0x2a => Some(LD(R(A), AddressHLIncr)),
