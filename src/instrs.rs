@@ -99,7 +99,7 @@ fn decode_load(opcode: u8) -> Option<Instr> {
     };
 }
 
-fn decode_8_bit_arithmetic(opcode: u8) -> Option<Instr> {
+fn decode_arithmetic(opcode: u8) -> Option<Instr> {
     use Operand::*;
     use Reg8::*;
 
@@ -117,7 +117,7 @@ fn decode_8_bit_arithmetic(opcode: u8) -> Option<Instr> {
 pub fn decode(opcode: u8) -> Instr {
     let maybe_instr = decode_misc(opcode)
         .or_else(|| decode_load(opcode))
-        .or_else(|| decode_8_bit_arithmetic(opcode));
+        .or_else(|| decode_arithmetic(opcode));
     match maybe_instr {
         Some(i) => return i,
         None => panic!("Illegal opcode {:#02x}", opcode),
