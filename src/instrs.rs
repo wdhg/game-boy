@@ -83,6 +83,7 @@ fn decode_load(opcode: u8) -> Option<Instr> {
         0xf0 => Some(LDH(R(A), AddressN)),
         0xf2 => Some(LDH(R(A), AddressC)),
         0x08 => Some(LD(AddressNN, RR(SP))),
+        0xf9 => Some(LD(RR(SP), RR(HL))),
         o if o & 0b11111000 == 0b01110000 => Some(LD(AddressHL, r_from_index(reg8_from))),
         o if o & 0b11000111 == 0b01000110 => Some(LD(r_from_index(reg8_to), AddressHL)),
         o if o & 0b11000111 == 0b00000110 => Some(LD(r_from_index(reg8_to), N)),
@@ -203,5 +204,10 @@ mod should {
     #[test]
     fn decode_loads_to_address_nn_from_sp() {
         assert_eq!(decode(0x08), LD(AddressNN, RR(SP)));
+    }
+
+    #[test]
+    fn decode_loads_to_sp_from_hl() {
+        assert_eq!(decode(0xf9), LD(RR(SP), RR(HL)));
     }
 }
