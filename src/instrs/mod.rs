@@ -312,4 +312,19 @@ mod should {
     fn decode_decrementing_address_hl() {
         assert_eq!(decode(0x35), DEC(AddressHL)); // DEC (HL)
     }
+
+    #[test]
+    fn decode_adding_16_bit_register_to_hl() {
+        // ADD HL, rr
+        assert_eq!(decode(0x09), ADD(RR(HL), RR(BC)));
+        assert_eq!(decode(0x19), ADD(RR(HL), RR(DE)));
+        assert_eq!(decode(0x29), ADD(RR(HL), RR(HL)));
+        assert_eq!(decode(0x39), ADD(RR(HL), RR(SP)));
+    }
+
+    #[test]
+    fn decode_adding_n_to_sp() {
+        // ADD SP, #
+        assert_eq!(decode(0xe8), ADD(RR(SP), N));
+    }
 }

@@ -1,9 +1,11 @@
-use super::instr::{r_from_index, Instr, Instr::*, Operand::*};
+use super::instr::{r_from_index, rr_from_index, Instr, Instr::*, Operand::*};
+use crate::gameboy::Reg16::*;
 use crate::gameboy::Reg8::*;
 
 pub(crate) fn decode(opcode: u8) -> Option<Instr> {
     let reg8_to = (opcode >> 3) & 0b111;
     let reg8_from = opcode & 0b111;
+    let reg16_from = (opcode >> 4) & 0b11;
 
     return match opcode {
         0xc6 => Some(ADD(R(A), N)),
@@ -23,6 +25,7 @@ pub(crate) fn decode(opcode: u8) -> Option<Instr> {
         0xfe => Some(CP(N)),
         0x34 => Some(INC(AddressHL)),
         0x35 => Some(DEC(AddressHL)),
+        0xe8 => Some(ADD(RR(SP), N)),
         o if o & 0b11111000 == 0b10000000 => Some(ADD(R(A), r_from_index(reg8_from))),
         o if o & 0b11111000 == 0b10001000 => Some(ADC(R(A), r_from_index(reg8_from))),
         o if o & 0b11111000 == 0b10010000 => Some(SUB(r_from_index(reg8_from))),
@@ -33,6 +36,7 @@ pub(crate) fn decode(opcode: u8) -> Option<Instr> {
         o if o & 0b11111000 == 0b10111000 => Some(CP(r_from_index(reg8_from))),
         o if o & 0b11000111 == 0b00000100 => Some(INC(r_from_index(reg8_to))),
         o if o & 0b11000111 == 0b00000101 => Some(DEC(r_from_index(reg8_to))),
+        o if o & 0b11001111 == 0b00001001 => Some(ADD(RR(HL), rr_from_index(reg16_from))),
         _ => None,
     };
 }
