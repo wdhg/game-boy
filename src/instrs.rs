@@ -44,6 +44,7 @@ pub enum Instr {
     SUB(Operand),          // sub instruction
     SBC(Operand),          // sub with carry instruction
     AND(Operand),          // and instruction
+    OR(Operand),           // or instruction
 }
 
 use Instr::*;
@@ -119,11 +120,14 @@ fn decode_arithmetic(opcode: u8) -> Option<Instr> {
         0x9e => Some(SBC(AddressHL)),
         0xa6 => Some(AND(AddressHL)),
         0xe6 => Some(AND(N)),
+        0xb6 => Some(OR(AddressHL)),
+        0xf6 => Some(OR(N)),
         o if o & 0b11111000 == 0b10000000 => Some(ADD(R(A), r_from_index(reg8_from))),
         o if o & 0b11111000 == 0b10001000 => Some(ADC(R(A), r_from_index(reg8_from))),
         o if o & 0b11111000 == 0b10010000 => Some(SUB(r_from_index(reg8_from))),
         o if o & 0b11111000 == 0b10011000 => Some(SBC(r_from_index(reg8_from))),
         o if o & 0b11111000 == 0b10100000 => Some(AND(r_from_index(reg8_from))),
+        o if o & 0b11111000 == 0b10110000 => Some(OR(r_from_index(reg8_from))),
         _ => None,
     };
 }
@@ -348,5 +352,23 @@ mod should {
     #[test]
     fn decode_anding_n() {
         assert_eq!(decode(0xe6), AND(N)); // AND #
+    }
+
+    #[test]
+    fn decode_oring_register() {
+        // OR r
+        assert_eq!(decode(0xb0), OR(R(B)));
+        assert_eq!(decode(0xb1), OR(R(C)));
+        assert_eq!(decode(0xb5), OR(R(L)));
+    }
+
+    #[test]
+    fn decode_oring_address_hl() {
+        assert_eq!(decode(0xb6), OR(AddressHL)); // OR (HL)
+    }
+
+    #[test]
+    fn decode_oring_n() {
+        assert_eq!(decode(0xf6), OR(N)); // OR #
     }
 }
