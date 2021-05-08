@@ -41,6 +41,7 @@ pub enum Instr {
     POP(Operand),          // pop instruction
     ADD(Operand, Operand), // add instruction
     ADC(Operand, Operand), // add + carry instruction
+    SUB(Operand),          // sub instruction
 }
 
 use Instr::*;
@@ -111,8 +112,11 @@ fn decode_arithmetic(opcode: u8) -> Option<Instr> {
         0x86 => Some(ADD(R(A), AddressHL)),
         0xce => Some(ADC(R(A), N)),
         0x8e => Some(ADC(R(A), AddressHL)),
+        0x96 => Some(SUB(AddressHL)),
+        0xd6 => Some(SUB(N)),
         o if o & 0b11111000 == 0b10000000 => Some(ADD(R(A), r_from_index(reg8_from))),
         o if o & 0b11111000 == 0b10001000 => Some(ADC(R(A), r_from_index(reg8_from))),
+        o if o & 0b11111000 == 0b10010000 => Some(SUB(r_from_index(reg8_from))),
         _ => None,
     };
 }
@@ -288,5 +292,23 @@ mod should {
     #[test]
     fn decode_adcing_n_to_register_a() {
         assert_eq!(decode(0xce), ADC(R(A), N)); // ADC A, #
+    }
+
+    #[test]
+    fn decode_subtracting_register() {
+        // SUB r
+        assert_eq!(decode(0x90), SUB(R(B)));
+        assert_eq!(decode(0x91), SUB(R(C)));
+        assert_eq!(decode(0x95), SUB(R(L)));
+    }
+
+    #[test]
+    fn decode_subtracting_address_hl() {
+        assert_eq!(decode(0x96), SUB(AddressHL)); // SUB (HL)
+    }
+
+    #[test]
+    fn decode_subtracting_n() {
+        assert_eq!(decode(0xd6), SUB(N)); // SUB #
     }
 }
