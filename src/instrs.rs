@@ -39,6 +39,7 @@ pub enum Instr {
     LD(Operand, Operand),  // load instruction
     LDH(Operand, Operand), // load instruction
     PUSH(Operand),         // push instruction
+    POP(Operand),          // pop instruction
 }
 
 use Instr::*;
@@ -93,6 +94,7 @@ fn decode_load(opcode: u8) -> Option<Instr> {
         }
         o if o & 0b11001111 == 0b00000001 => Some(LD(rr_from_index(reg16_to), NN)),
         o if o & 0b11001111 == 0b11000101 => Some(PUSH(rr_from_index(reg16_to))),
+        o if o & 0b11001111 == 0b11000001 => Some(POP(rr_from_index(reg16_to))),
         _ => None,
     };
 }
@@ -220,5 +222,14 @@ mod should {
         assert_eq!(decode(0xd5), PUSH(RR(DE)));
         assert_eq!(decode(0xe5), PUSH(RR(HL)));
         assert_eq!(decode(0xf5), PUSH(RR(SP)));
+    }
+
+    #[test]
+    fn decode_popping_16_bit_register() {
+        // POP rr
+        assert_eq!(decode(0xc1), POP(RR(BC)));
+        assert_eq!(decode(0xd1), POP(RR(DE)));
+        assert_eq!(decode(0xe1), POP(RR(HL)));
+        assert_eq!(decode(0xf1), POP(RR(SP)));
     }
 }
