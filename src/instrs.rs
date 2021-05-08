@@ -47,6 +47,8 @@ pub enum Instr {
     OR(Operand),           // or instruction
     XOR(Operand),          // xor instruction
     CP(Operand),           // compare instruction
+    INC(Operand),          // increment instruction
+    DEC(Operand),          // decrement instruction
 }
 
 use Instr::*;
@@ -110,6 +112,7 @@ fn decode_arithmetic(opcode: u8) -> Option<Instr> {
     use Operand::*;
     use Reg8::*;
 
+    let reg8_to = (opcode >> 3) & 0b111;
     let reg8_from = opcode & 0b111;
 
     return match opcode {
@@ -128,6 +131,7 @@ fn decode_arithmetic(opcode: u8) -> Option<Instr> {
         0xee => Some(XOR(N)),
         0xbe => Some(CP(AddressHL)),
         0xfe => Some(CP(N)),
+        0x34 => Some(INC(AddressHL)),
         o if o & 0b11111000 == 0b10000000 => Some(ADD(R(A), r_from_index(reg8_from))),
         o if o & 0b11111000 == 0b10001000 => Some(ADC(R(A), r_from_index(reg8_from))),
         o if o & 0b11111000 == 0b10010000 => Some(SUB(r_from_index(reg8_from))),
@@ -136,6 +140,7 @@ fn decode_arithmetic(opcode: u8) -> Option<Instr> {
         o if o & 0b11111000 == 0b10110000 => Some(OR(r_from_index(reg8_from))),
         o if o & 0b11111000 == 0b10101000 => Some(XOR(r_from_index(reg8_from))),
         o if o & 0b11111000 == 0b10111000 => Some(CP(r_from_index(reg8_from))),
+        o if o & 0b11000111 == 0b00000100 => Some(INC(r_from_index(reg8_to))),
         _ => None,
     };
 }
@@ -414,5 +419,20 @@ mod should {
     #[test]
     fn decode_comparing_n() {
         assert_eq!(decode(0xfe), CP(N)); // CP #
+    }
+
+    #[test]
+    fn decode_incrementing_register() {
+        // INC r
+        assert_eq!(decode(0x3c), INC(R(A)));
+        assert_eq!(decode(0x04), INC(R(B)));
+        assert_eq!(decode(0x0c), INC(R(C)));
+        assert_eq!(decode(0x24), INC(R(H)));
+        assert_eq!(decode(0x2c), INC(R(L)));
+    }
+
+    #[test]
+    fn decode_incrementing_address_hl() {
+        assert_eq!(decode(0x34), INC(AddressHL)); // INC (HL)
     }
 }
