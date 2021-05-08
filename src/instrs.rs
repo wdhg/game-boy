@@ -43,6 +43,7 @@ pub enum Instr {
     ADC(Operand, Operand), // add with carry instruction
     SUB(Operand),          // sub instruction
     SBC(Operand),          // sub with carry instruction
+    AND(Operand),          // and instruction
 }
 
 use Instr::*;
@@ -116,10 +117,13 @@ fn decode_arithmetic(opcode: u8) -> Option<Instr> {
         0x96 => Some(SUB(AddressHL)),
         0xd6 => Some(SUB(N)),
         0x9e => Some(SBC(AddressHL)),
+        0xa6 => Some(AND(AddressHL)),
+        0xe6 => Some(AND(N)),
         o if o & 0b11111000 == 0b10000000 => Some(ADD(R(A), r_from_index(reg8_from))),
         o if o & 0b11111000 == 0b10001000 => Some(ADC(R(A), r_from_index(reg8_from))),
         o if o & 0b11111000 == 0b10010000 => Some(SUB(r_from_index(reg8_from))),
         o if o & 0b11111000 == 0b10011000 => Some(SBC(r_from_index(reg8_from))),
+        o if o & 0b11111000 == 0b10100000 => Some(AND(r_from_index(reg8_from))),
         _ => None,
     };
 }
@@ -326,5 +330,23 @@ mod should {
     #[test]
     fn decode_subtracting_address_hl_with_carry() {
         assert_eq!(decode(0x9e), SBC(AddressHL)); // SBC (HL)
+    }
+
+    #[test]
+    fn decode_anding_register() {
+        // AND r
+        assert_eq!(decode(0xa0), AND(R(B)));
+        assert_eq!(decode(0xa1), AND(R(C)));
+        assert_eq!(decode(0xa5), AND(R(L)));
+    }
+
+    #[test]
+    fn decode_anding_address_hl() {
+        assert_eq!(decode(0xa6), AND(AddressHL)); // AND (HL)
+    }
+
+    #[test]
+    fn decode_anding_n() {
+        assert_eq!(decode(0xe6), AND(N)); // AND #
     }
 }
