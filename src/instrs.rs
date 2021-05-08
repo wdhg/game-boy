@@ -14,7 +14,6 @@ pub enum Operand {
     AddressHL,     // 16 bit address stored in H and L
     AddressHLIncr, // 16 bit address stored in H and L, incremented after use
     AddressHLDecr, // 16 bit address stored in H and L, decremented after use
-    AddressSP,     // 16 bit address stored in SP
 }
 
 fn r_from_index(i: u8) -> Operand {
