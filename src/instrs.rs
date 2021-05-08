@@ -132,6 +132,7 @@ fn decode_arithmetic(opcode: u8) -> Option<Instr> {
         0xbe => Some(CP(AddressHL)),
         0xfe => Some(CP(N)),
         0x34 => Some(INC(AddressHL)),
+        0x35 => Some(DEC(AddressHL)),
         o if o & 0b11111000 == 0b10000000 => Some(ADD(R(A), r_from_index(reg8_from))),
         o if o & 0b11111000 == 0b10001000 => Some(ADC(R(A), r_from_index(reg8_from))),
         o if o & 0b11111000 == 0b10010000 => Some(SUB(r_from_index(reg8_from))),
@@ -141,6 +142,7 @@ fn decode_arithmetic(opcode: u8) -> Option<Instr> {
         o if o & 0b11111000 == 0b10101000 => Some(XOR(r_from_index(reg8_from))),
         o if o & 0b11111000 == 0b10111000 => Some(CP(r_from_index(reg8_from))),
         o if o & 0b11000111 == 0b00000100 => Some(INC(r_from_index(reg8_to))),
+        o if o & 0b11000111 == 0b00000101 => Some(DEC(r_from_index(reg8_to))),
         _ => None,
     };
 }
@@ -434,5 +436,20 @@ mod should {
     #[test]
     fn decode_incrementing_address_hl() {
         assert_eq!(decode(0x34), INC(AddressHL)); // INC (HL)
+    }
+
+    #[test]
+    fn decode_decrementing_register() {
+        // DEC r
+        assert_eq!(decode(0x3d), DEC(R(A)));
+        assert_eq!(decode(0x05), DEC(R(B)));
+        assert_eq!(decode(0x0d), DEC(R(C)));
+        assert_eq!(decode(0x25), DEC(R(H)));
+        assert_eq!(decode(0x2d), DEC(R(L)));
+    }
+
+    #[test]
+    fn decode_decrementing_address_hl() {
+        assert_eq!(decode(0x35), DEC(AddressHL)); // DEC (HL)
     }
 }
