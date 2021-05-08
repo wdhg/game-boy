@@ -36,10 +36,27 @@ impl Reg8 {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum Reg16 {
+    BC,
+    DE,
+    HL,
     SP,
     PC,
+}
+
+impl Reg16 {
+    pub fn from_index(i: u8) -> Reg16 {
+        use Reg16::*;
+        // i is 2 bits long
+        match i {
+            0b00 => BC,
+            0b01 => DE,
+            0b10 => HL,
+            0b11 => SP,
+            _ => panic!("Illegal 16-bit register index {}", i),
+        }
+    }
 }
 
 pub struct GameBoy {

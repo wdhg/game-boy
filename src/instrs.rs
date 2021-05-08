@@ -1,4 +1,4 @@
-use crate::gameboy::Reg8;
+use crate::gameboy::{Reg16, Reg8};
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Operand {
@@ -6,6 +6,7 @@ pub enum Operand {
     N,             // 8 bit number following opcode
     AddressN,      // 8 bit address following opcode
     AddressC,      // 8 bit address stored in C
+    RR(Reg16),     // 16 bit register
     NN,            // 16 bit number following opcode
     AddressNN,     // 16 bit address following opcode
     AddressBC,     // 16 bit address stored in B and C
@@ -18,6 +19,10 @@ pub enum Operand {
 
 fn r_from_index(i: u8) -> Operand {
     return Operand::R(Reg8::from_index(i));
+}
+
+fn rr_from_index(i: u8) -> Operand {
+    return Operand::RR(Reg16::from_index(i));
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -56,8 +61,9 @@ fn decode_load(opcode: u8) -> Option<Instr> {
     use Operand::*;
     use Reg8::*;
 
-    let reg_to = (opcode >> 3) & 0b111;
-    let reg_from = opcode & 0b111;
+    let reg8_to = (opcode >> 3) & 0b111;
+    let reg8_from = opcode & 0b111;
+    let reg16_to = (opcode >> 4) & 0b11;
 
     return match opcode {
         0x0a => Some(LD(R(A), AddressBC)),
@@ -75,10 +81,13 @@ fn decode_load(opcode: u8) -> Option<Instr> {
         0xe2 => Some(LDH(AddressC, R(A))),
         0xf0 => Some(LDH(R(A), AddressN)),
         0xf2 => Some(LDH(R(A), AddressC)),
-        o if o & 0b11111000 == 0b01110000 => Some(LD(AddressHL, r_from_index(reg_from))),
-        o if o & 0b11000111 == 0b01000110 => Some(LD(r_from_index(reg_to), AddressHL)),
-        o if o & 0b11000111 == 0b00000110 => Some(LD(r_from_index(reg_to), N)),
-        o if o & 0b11000000 == 0b01000000 => Some(LD(r_from_index(reg_to), r_from_index(reg_from))),
+        o if o & 0b11111000 == 0b01110000 => Some(LD(AddressHL, r_from_index(reg8_from))),
+        o if o & 0b11000111 == 0b01000110 => Some(LD(r_from_index(reg8_to), AddressHL)),
+        o if o & 0b11000111 == 0b00000110 => Some(LD(r_from_index(reg8_to), N)),
+        o if o & 0b11000000 == 0b01000000 => {
+            Some(LD(r_from_index(reg8_to), r_from_index(reg8_from)))
+        }
+        o if o & 0b11001111 == 0b00000001 => Some(LD(rr_from_index(reg16_to), NN)),
         _ => None,
     };
 }
@@ -96,6 +105,7 @@ pub fn decode(opcode: u8) -> Instr {
 mod should {
     use super::*;
     use Operand::*;
+    use Reg16::*;
     use Reg8::*;
 
     #[test]
@@ -177,5 +187,11 @@ mod should {
         assert_eq!(decode(0xe2), LDH(AddressC, R(A))); // LDH (C), A
         assert_eq!(decode(0xf0), LDH(R(A), AddressN)); // LDH A, (n)
         assert_eq!(decode(0xf2), LDH(R(A), AddressC)); // LDH A, (C)
+    }
+
+    #[test]
+    fn decode_loads_to_16_bit_register_from_nn() {
+        // LD rr, nn
+        assert_eq!(decode(0x01), LD(RR(BC), NN));
     }
 }
