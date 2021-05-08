@@ -46,6 +46,7 @@ pub enum Instr {
     AND(Operand),          // and instruction
     OR(Operand),           // or instruction
     XOR(Operand),          // xor instruction
+    CP(Operand),           // compare instruction
 }
 
 use Instr::*;
@@ -125,6 +126,8 @@ fn decode_arithmetic(opcode: u8) -> Option<Instr> {
         0xf6 => Some(OR(N)),
         0xae => Some(XOR(AddressHL)),
         0xee => Some(XOR(N)),
+        0xbe => Some(CP(AddressHL)),
+        0xfe => Some(CP(N)),
         o if o & 0b11111000 == 0b10000000 => Some(ADD(R(A), r_from_index(reg8_from))),
         o if o & 0b11111000 == 0b10001000 => Some(ADC(R(A), r_from_index(reg8_from))),
         o if o & 0b11111000 == 0b10010000 => Some(SUB(r_from_index(reg8_from))),
@@ -132,6 +135,7 @@ fn decode_arithmetic(opcode: u8) -> Option<Instr> {
         o if o & 0b11111000 == 0b10100000 => Some(AND(r_from_index(reg8_from))),
         o if o & 0b11111000 == 0b10110000 => Some(OR(r_from_index(reg8_from))),
         o if o & 0b11111000 == 0b10101000 => Some(XOR(r_from_index(reg8_from))),
+        o if o & 0b11111000 == 0b10111000 => Some(CP(r_from_index(reg8_from))),
         _ => None,
     };
 }
@@ -392,5 +396,23 @@ mod should {
     #[test]
     fn decode_xoring_n() {
         assert_eq!(decode(0xee), XOR(N)); // XOR #
+    }
+
+    #[test]
+    fn decode_comparing_register() {
+        // CP r
+        assert_eq!(decode(0xb8), CP(R(B)));
+        assert_eq!(decode(0xb9), CP(R(C)));
+        assert_eq!(decode(0xbd), CP(R(L)));
+    }
+
+    #[test]
+    fn decode_comparing_address_hl() {
+        assert_eq!(decode(0xbe), CP(AddressHL)); // CP (HL)
+    }
+
+    #[test]
+    fn decode_comparing_n() {
+        assert_eq!(decode(0xfe), CP(N)); // CP #
     }
 }
