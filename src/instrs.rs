@@ -59,6 +59,7 @@ fn decode_misc(opcode: u8) -> Option<Instr> {
 
 fn decode_load(opcode: u8) -> Option<Instr> {
     use Operand::*;
+    use Reg16::*;
     use Reg8::*;
 
     let reg8_to = (opcode >> 3) & 0b111;
@@ -81,6 +82,7 @@ fn decode_load(opcode: u8) -> Option<Instr> {
         0xe2 => Some(LDH(AddressC, R(A))),
         0xf0 => Some(LDH(R(A), AddressN)),
         0xf2 => Some(LDH(R(A), AddressC)),
+        0x08 => Some(LD(AddressNN, RR(SP))),
         o if o & 0b11111000 == 0b01110000 => Some(LD(AddressHL, r_from_index(reg8_from))),
         o if o & 0b11000111 == 0b01000110 => Some(LD(r_from_index(reg8_to), AddressHL)),
         o if o & 0b11000111 == 0b00000110 => Some(LD(r_from_index(reg8_to), N)),
@@ -193,5 +195,13 @@ mod should {
     fn decode_loads_to_16_bit_register_from_nn() {
         // LD rr, nn
         assert_eq!(decode(0x01), LD(RR(BC), NN));
+        assert_eq!(decode(0x11), LD(RR(DE), NN));
+        assert_eq!(decode(0x21), LD(RR(HL), NN));
+        assert_eq!(decode(0x31), LD(RR(SP), NN));
+    }
+
+    #[test]
+    fn decode_loads_to_address_nn_from_sp() {
+        assert_eq!(decode(0x08), LD(AddressNN, RR(SP)));
     }
 }
