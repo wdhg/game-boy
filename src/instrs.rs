@@ -39,6 +39,7 @@ pub enum Instr {
     LDH(Operand, Operand), // load instruction
     PUSH(Operand),         // push instruction
     POP(Operand),          // pop instruction
+    ADD(Operand),          // add instruction
 }
 
 use Instr::*;
@@ -98,9 +99,24 @@ fn decode_load(opcode: u8) -> Option<Instr> {
     };
 }
 
+fn decode_8_bit_arithmetic(opcode: u8) -> Option<Instr> {
+    use Operand::*;
+
+    let reg8_from = opcode & 0b111;
+
+    return match opcode {
+        0xc6 => Some(ADD(N)),
+        0x86 => Some(ADD(AddressHL)),
+        o if o & 0b11111000 == 0b10000000 => Some(ADD(r_from_index(reg8_from))),
+        _ => None,
+    };
+}
+
 #[allow(dead_code)]
 pub fn decode(opcode: u8) -> Instr {
-    let maybe_instr = decode_misc(opcode).or_else(|| decode_load(opcode));
+    let maybe_instr = decode_misc(opcode)
+        .or_else(|| decode_load(opcode))
+        .or_else(|| decode_8_bit_arithmetic(opcode));
     match maybe_instr {
         Some(i) => return i,
         None => panic!("Illegal opcode {:#02x}", opcode),
@@ -230,5 +246,26 @@ mod should {
         assert_eq!(decode(0xd1), POP(RR(DE)));
         assert_eq!(decode(0xe1), POP(RR(HL)));
         assert_eq!(decode(0xf1), POP(RR(SP)));
+    }
+
+    #[test]
+    fn decode_adding_register_to_register_a() {
+        // ADD A, r
+        assert_eq!(decode(0x80), ADD(R(B)));
+        assert_eq!(decode(0x82), ADD(R(D)));
+        assert_eq!(decode(0x85), ADD(R(L)));
+    }
+
+    #[test]
+    fn decode_adding_address_hl_to_register_a() {
+        // ADD A, (HL)
+        assert_eq!(decode(0x86), ADD(AddressHL));
+    }
+
+    #[test]
+    fn decode_adding_n_to_register_a() {
+        // NOTE i am guessing at what '#' in 'LD A, #' means
+        // ADD A, #
+        assert_eq!(decode(0xc6), ADD(N));
     }
 }
