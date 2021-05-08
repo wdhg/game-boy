@@ -37,6 +37,7 @@ pub(crate) fn decode(opcode: u8) -> Option<Instr> {
         o if o & 0b11000111 == 0b00000100 => Some(INC(r_from_index(reg8_to))),
         o if o & 0b11000111 == 0b00000101 => Some(DEC(r_from_index(reg8_to))),
         o if o & 0b11001111 == 0b00001001 => Some(ADD(RR(HL), rr_from_index(reg16_from))),
+        o if o & 0b11001111 == 0b00000011 => Some(INC(rr_from_index(reg16_from))),
         _ => None,
     };
 }

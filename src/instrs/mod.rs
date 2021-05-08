@@ -327,4 +327,13 @@ mod should {
         // ADD SP, #
         assert_eq!(decode(0xe8), ADD(RR(SP), N));
     }
+
+    #[test]
+    fn decode_incrementing_16_bit_register() {
+        // INC rr
+        assert_eq!(decode(0x03), INC(RR(BC)));
+        assert_eq!(decode(0x13), INC(RR(DE)));
+        assert_eq!(decode(0x23), INC(RR(HL)));
+        assert_eq!(decode(0x33), INC(RR(SP)));
+    }
 }
