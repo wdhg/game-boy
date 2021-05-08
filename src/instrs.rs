@@ -54,12 +54,29 @@ fn decode_misc(opcode: u8) -> Option<Instr> {
 
 fn decode_load(opcode: u8) -> Option<Instr> {
     use Operand::*;
+    use Reg8::*;
 
     let reg_to = (opcode >> 3) & 0b111;
     let reg_from = opcode & 0b111;
 
     return match opcode {
+        0x0a => Some(LD(R(A), AddressBC)),
+        0x1a => Some(LD(R(A), AddressDE)),
+        0x02 => Some(LD(R(A), AddressBC)),
+        0x12 => Some(LD(R(A), AddressDE)),
+
+        0xfa => Some(LD(R(A), AddressNN)),
+        0xea => Some(LD(AddressNN, R(A))),
+
         0x36 => Some(LD(AddressHL, N)),
+        0x22 => Some(LD(AddressHLIncr, R(A))),
+        0x2a => Some(LD(R(A), AddressHLIncr)),
+        0x32 => Some(LD(AddressHLDecr, R(A))),
+        0x3a => Some(LD(R(A), AddressHLDecr)),
+        0xe0 => Some(LDH(AddressN, R(A))),
+        0xe2 => Some(LDH(AddressC, R(A))),
+        0xf0 => Some(LDH(R(A), AddressN)),
+        0xf2 => Some(LDH(R(A), AddressC)),
         o if o & 0b11111000 == 0b01110000 => Some(LD(AddressHL, r_from_index(reg_from))),
         o if o & 0b11000111 == 0b01000110 => Some(LD(r_from_index(reg_to), AddressHL)),
         o if o & 0b11000111 == 0b00000110 => Some(LD(r_from_index(reg_to), N)),
@@ -104,15 +121,63 @@ mod should {
     }
 
     #[test]
-    fn decode_ld() {
-        assert_eq!(decode(0x36), LD(AddressHL, N));
-        assert_eq!(decode(0x41), LD(R(B), R(C)));
-        assert_eq!(decode(0x6c), LD(R(L), R(H)));
+    fn decode_loads_to_registers_from_n() {
+        // LD r, n
         assert_eq!(decode(0x06), LD(R(B), N));
         assert_eq!(decode(0x1e), LD(R(E), N));
-        assert_eq!(decode(0x46), LD(R(B), AddressHL));
-        assert_eq!(decode(0x5e), LD(R(E), AddressHL));
-        assert_eq!(decode(0x70), LD(AddressHL, R(B)));
-        assert_eq!(decode(0x77), LD(AddressHL, R(A)));
+    }
+
+    #[test]
+    fn decode_loads_between_r() {
+        // LD r, r'
+        assert_eq!(decode(0x41), LD(R(B), R(C)));
+        assert_eq!(decode(0x6c), LD(R(L), R(H)));
+    }
+
+    #[test]
+    fn decode_loads_between_a_and_joined_r_address() {
+        assert_eq!(decode(0x0a), LD(R(A), AddressBC)); // LD A, (BC)
+        assert_eq!(decode(0x1a), LD(R(A), AddressDE)); // LD A, (DE)
+        assert_eq!(decode(0x02), LD(R(A), AddressBC)); // LD (BC), A
+        assert_eq!(decode(0x12), LD(R(A), AddressDE)); // LD (DE), A
+    }
+
+    #[test]
+    fn decode_loads_between_a_and_address_nn() {
+        assert_eq!(decode(0xfa), LD(R(A), AddressNN)); // LD A, (nn)
+        assert_eq!(decode(0xea), LD(AddressNN, R(A))); // LD (nn), A
+    }
+
+    #[test]
+    fn decode_loads_to_address_hl_from_n() {
+        assert_eq!(decode(0x36), LD(AddressHL, N)); // LD (HL), n
+    }
+
+    #[test]
+    fn decode_loads_between_r_and_address_hl() {
+        assert_eq!(decode(0x46), LD(R(B), AddressHL)); // LD r, (HL)
+        assert_eq!(decode(0x5e), LD(R(E), AddressHL)); // LD r, (HL)
+        assert_eq!(decode(0x70), LD(AddressHL, R(B))); // LD (HL), r
+        assert_eq!(decode(0x77), LD(AddressHL, R(A))); // LD (HL), r
+    }
+
+    #[test]
+    fn decode_loads_between_r_and_incremented_address_hl() {
+        assert_eq!(decode(0x22), LD(AddressHLIncr, R(A))); // LD (HL+), A
+        assert_eq!(decode(0x2a), LD(R(A), AddressHLIncr)); // LD A, (HL+)
+    }
+
+    #[test]
+    fn decode_loads_between_r_and_decremented_address_hl() {
+        assert_eq!(decode(0x32), LD(AddressHLDecr, R(A))); // LD (HL-), A
+        assert_eq!(decode(0x3a), LD(R(A), AddressHLDecr)); // LD A, (HL-)
+    }
+
+    #[test]
+    fn decode_ldh() {
+        assert_eq!(decode(0xe0), LDH(AddressN, R(A))); // LDH (n), A
+        assert_eq!(decode(0xe2), LDH(AddressC, R(A))); // LDH (C), A
+        assert_eq!(decode(0xf0), LDH(R(A), AddressN)); // LDH A, (n)
+        assert_eq!(decode(0xf2), LDH(R(A), AddressC)); // LDH A, (C)
     }
 }
