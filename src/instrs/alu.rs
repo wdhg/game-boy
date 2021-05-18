@@ -65,7 +65,6 @@ pub(crate) fn decode_prefixed(opcode: u8) -> Option<Instr> {
         o if o & 0b11111000 == 0b00100000 => Some(SLA(r_from_index(reg8_op))),
         o if o & 0b11111000 == 0b00101000 => Some(SRA(r_from_index(reg8_op))),
         o if o & 0b11111000 == 0b00111000 => Some(SRL(r_from_index(reg8_op))),
-
         _ => None,
     };
 }
