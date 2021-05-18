@@ -55,10 +55,17 @@ pub(crate) fn decode_prefixed(opcode: u8) -> Option<Instr> {
         0x16 => Some(RL(AddressHL)),
         0x0e => Some(RRC(AddressHL)),
         0x1e => Some(RR(AddressHL)),
+        0x26 => Some(SLA(AddressHL)),
+        0x2e => Some(SRA(AddressHL)),
+        0x3e => Some(SRL(AddressHL)),
         o if o & 0b11111000 == 0b00000000 => Some(RLC(r_from_index(reg8_op))),
         o if o & 0b11111000 == 0b00010000 => Some(RL(r_from_index(reg8_op))),
         o if o & 0b11111000 == 0b00001000 => Some(RRC(r_from_index(reg8_op))),
         o if o & 0b11111000 == 0b00011000 => Some(RR(r_from_index(reg8_op))),
+        o if o & 0b11111000 == 0b00100000 => Some(SLA(r_from_index(reg8_op))),
+        o if o & 0b11111000 == 0b00101000 => Some(SRA(r_from_index(reg8_op))),
+        o if o & 0b11111000 == 0b00111000 => Some(SRL(r_from_index(reg8_op))),
+
         _ => None,
     };
 }

@@ -53,4 +53,7 @@ pub enum Instr {
     RL(Operand),           // rotate left
     RRC(Operand),          // rotate right with carry
     RR(Operand),           // rotate right
+    SLA(Operand),          // shift left into carry (LSB = 0)
+    SRA(Operand),          // shift right into carry (MSB constant)
+    SRL(Operand),          // shift left into carry (MSB = 0)
 }

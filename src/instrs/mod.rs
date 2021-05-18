@@ -387,4 +387,25 @@ mod should {
         assert_eq!(decode_prefixed(0x1a), RR(R8(D)));
         assert_eq!(decode_prefixed(0x1e), RR(AddressHL));
     }
+
+    #[test]
+    fn decode_shift_left() {
+        assert_eq!(decode_prefixed(0x27), SLA(R8(A)));
+        assert_eq!(decode_prefixed(0x25), SLA(R8(L)));
+        assert_eq!(decode_prefixed(0x26), SLA(AddressHL));
+    }
+
+    #[test]
+    fn decode_shift_right_msb_unchanging() {
+        assert_eq!(decode_prefixed(0x2f), SRA(R8(A)));
+        assert_eq!(decode_prefixed(0x29), SRA(R8(C)));
+        assert_eq!(decode_prefixed(0x2e), SRA(AddressHL));
+    }
+
+    #[test]
+    fn decode_shift_right_msb_unset() {
+        assert_eq!(decode_prefixed(0x3f), SRL(R8(A)));
+        assert_eq!(decode_prefixed(0x3c), SRL(R8(H)));
+        assert_eq!(decode_prefixed(0x3e), SRL(AddressHL));
+    }
 }
