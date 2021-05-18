@@ -2,7 +2,7 @@ use super::instr::{r_from_index, rr_from_index, Instr, Instr::*, Operand::*};
 use crate::gameboy::Reg16::*;
 use crate::gameboy::Reg8::*;
 
-pub(crate) fn decode(opcode: u8) -> Option<Instr> {
+pub(crate) fn decode_unprefixed(opcode: u8) -> Option<Instr> {
     let reg8_to = (opcode >> 3) & 0b111;
     let reg8_from = opcode & 0b111;
     let reg16_from = (opcode >> 4) & 0b11;
@@ -39,6 +39,16 @@ pub(crate) fn decode(opcode: u8) -> Option<Instr> {
         o if o & 0b11001111 == 0b00001001 => Some(ADD(R16(HL), rr_from_index(reg16_from))),
         o if o & 0b11001111 == 0b00000011 => Some(INC(rr_from_index(reg16_from))),
         o if o & 0b11001111 == 0b00001011 => Some(DEC(rr_from_index(reg16_from))),
+        _ => None,
+    };
+}
+
+pub(crate) fn decode_prefixed(opcode: u8) -> Option<Instr> {
+    return match opcode {
+        0x07 => Some(RLCA),
+        0x17 => Some(RLA),
+        0x0f => Some(RRCA),
+        0x1f => Some(RRA),
         _ => None,
     };
 }
