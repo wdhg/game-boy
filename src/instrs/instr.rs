@@ -49,8 +49,8 @@ pub enum Instr {
     CP(Operand),           // compare instruction
     INC(Operand),          // increment instruction
     DEC(Operand),          // decrement instruction
-    RLCA,                  // rotate left with carry
-    RLA,                   // rotate left
-    RRCA,                  // rotate right with carry
-    RRA,                   // rotate right
+    RLC(Operand),          // rotate left with carry
+    RL(Operand),           // rotate left
+    RRC(Operand),          // rotate right with carry
+    RR(Operand),           // rotate right
 }

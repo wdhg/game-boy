@@ -357,10 +357,34 @@ mod should {
     }
 
     #[test]
-    fn decode_rotating_register_a() {
-        assert_eq!(decode_prefixed(0x07), RLCA);
-        assert_eq!(decode_prefixed(0x17), RLA);
-        assert_eq!(decode_prefixed(0x0f), RRCA);
-        assert_eq!(decode_prefixed(0x1f), RRA);
+    fn decode_rotating_left_carry() {
+        assert_eq!(decode_unprefixed(0x07), RLC(R8(A)));
+
+        assert_eq!(decode_prefixed(0x05), RLC(R8(L)));
+        assert_eq!(decode_prefixed(0x06), RLC(AddressHL));
+    }
+
+    #[test]
+    fn decode_rotating_left() {
+        assert_eq!(decode_unprefixed(0x17), RL(R8(A)));
+
+        assert_eq!(decode_prefixed(0x12), RL(R8(D)));
+        assert_eq!(decode_prefixed(0x16), RL(AddressHL));
+    }
+
+    #[test]
+    fn decode_rotating_right_carry() {
+        assert_eq!(decode_unprefixed(0x0f), RRC(R8(A)));
+
+        assert_eq!(decode_prefixed(0x09), RRC(R8(C)));
+        assert_eq!(decode_prefixed(0x0e), RRC(AddressHL));
+    }
+
+    #[test]
+    fn decode_rotating_right() {
+        assert_eq!(decode_unprefixed(0x1f), RR(R8(A)));
+
+        assert_eq!(decode_prefixed(0x1a), RR(R8(D)));
+        assert_eq!(decode_prefixed(0x1e), RR(AddressHL));
     }
 }

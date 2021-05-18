@@ -26,6 +26,10 @@ pub(crate) fn decode_unprefixed(opcode: u8) -> Option<Instr> {
         0x34 => Some(INC(AddressHL)),
         0x35 => Some(DEC(AddressHL)),
         0xe8 => Some(ADD(R16(SP), N)),
+        0x07 => Some(RLC(R8(A))),
+        0x17 => Some(RL(R8(A))),
+        0x0f => Some(RRC(R8(A))),
+        0x1f => Some(RR(R8(A))),
         o if o & 0b11111000 == 0b10000000 => Some(ADD(R8(A), r_from_index(reg8_from))),
         o if o & 0b11111000 == 0b10001000 => Some(ADC(R8(A), r_from_index(reg8_from))),
         o if o & 0b11111000 == 0b10010000 => Some(SUB(r_from_index(reg8_from))),
@@ -44,11 +48,17 @@ pub(crate) fn decode_unprefixed(opcode: u8) -> Option<Instr> {
 }
 
 pub(crate) fn decode_prefixed(opcode: u8) -> Option<Instr> {
+    let reg8_op = opcode & 0b111;
+
     return match opcode {
-        0x07 => Some(RLCA),
-        0x17 => Some(RLA),
-        0x0f => Some(RRCA),
-        0x1f => Some(RRA),
+        0x06 => Some(RLC(AddressHL)),
+        0x16 => Some(RL(AddressHL)),
+        0x0e => Some(RRC(AddressHL)),
+        0x1e => Some(RR(AddressHL)),
+        o if o & 0b11111000 == 0b00000000 => Some(RLC(r_from_index(reg8_op))),
+        o if o & 0b11111000 == 0b00010000 => Some(RL(r_from_index(reg8_op))),
+        o if o & 0b11111000 == 0b00001000 => Some(RRC(r_from_index(reg8_op))),
+        o if o & 0b11111000 == 0b00011000 => Some(RR(r_from_index(reg8_op))),
         _ => None,
     };
 }
