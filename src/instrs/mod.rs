@@ -1,4 +1,3 @@
-#[allow(dead_code)]
 mod alu;
 pub mod instr;
 mod load;
@@ -6,8 +5,10 @@ mod misc;
 
 use instr::Instr;
 
+#[allow(dead_code)]
 const PREFIX: u8 = 0xcb;
 
+#[allow(dead_code)]
 pub fn decode_unprefixed(opcode: u8) -> Instr {
     let maybe_instr = misc::decode(opcode)
         .or_else(|| load::decode(opcode))
@@ -18,6 +19,7 @@ pub fn decode_unprefixed(opcode: u8) -> Instr {
     }
 }
 
+#[allow(dead_code)]
 pub fn decode_prefixed(opcode: u8) -> Instr {
     let maybe_instr = alu::decode_prefixed(opcode);
     match maybe_instr {

@@ -16,11 +16,14 @@ pub enum Operand {
     AddressHLDecr, // 16 bit address stored in H and L, decremented after use
 }
 
-pub fn r_from_index(i: u8) -> Operand {
+pub(crate) fn operand8_from_index(i: u8) -> Operand {
+    if i == 6 {
+        return Operand::AddressHL;
+    }
     return Operand::R8(Reg8::from_index(i));
 }
 
-pub fn rr_from_index(i: u8) -> Operand {
+pub(crate) fn operand16_from_index(i: u8) -> Operand {
     return Operand::R16(Reg16::from_index(i));
 }
 

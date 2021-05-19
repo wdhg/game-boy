@@ -1,70 +1,53 @@
-use super::instr::{r_from_index, rr_from_index, Instr, Instr::*, Operand::*};
+use super::instr::{operand16_from_index, operand8_from_index, Instr, Instr::*, Operand::*};
 use crate::gameboy::Reg16::*;
 use crate::gameboy::Reg8::*;
 
 pub(crate) fn decode_unprefixed(opcode: u8) -> Option<Instr> {
-    let reg8_to = (opcode >> 3) & 0b111;
-    let reg8_from = opcode & 0b111;
-    let reg16_from = (opcode >> 4) & 0b11;
+    let op8_to = operand8_from_index((opcode >> 3) & 0b111);
+    let op8_from = operand8_from_index(opcode & 0b111);
+    let op16_from = operand16_from_index((opcode >> 4) & 0b11);
 
     return match opcode {
         0xc6 => Some(ADD(R8(A), N)),
-        0x86 => Some(ADD(R8(A), AddressHL)),
         0xce => Some(ADC(R8(A), N)),
-        0x8e => Some(ADC(R8(A), AddressHL)),
-        0x96 => Some(SUB(AddressHL)),
         0xd6 => Some(SUB(N)),
-        0x9e => Some(SBC(AddressHL)),
-        0xa6 => Some(AND(AddressHL)),
         0xe6 => Some(AND(N)),
-        0xb6 => Some(OR(AddressHL)),
         0xf6 => Some(OR(N)),
-        0xae => Some(XOR(AddressHL)),
         0xee => Some(XOR(N)),
-        0xbe => Some(CP(AddressHL)),
         0xfe => Some(CP(N)),
-        0x34 => Some(INC(AddressHL)),
-        0x35 => Some(DEC(AddressHL)),
         0xe8 => Some(ADD(R16(SP), N)),
         0x07 => Some(RLC(R8(A))),
         0x17 => Some(RL(R8(A))),
         0x0f => Some(RRC(R8(A))),
         0x1f => Some(RR(R8(A))),
-        o if o & 0b11111000 == 0b10000000 => Some(ADD(R8(A), r_from_index(reg8_from))),
-        o if o & 0b11111000 == 0b10001000 => Some(ADC(R8(A), r_from_index(reg8_from))),
-        o if o & 0b11111000 == 0b10010000 => Some(SUB(r_from_index(reg8_from))),
-        o if o & 0b11111000 == 0b10011000 => Some(SBC(r_from_index(reg8_from))),
-        o if o & 0b11111000 == 0b10100000 => Some(AND(r_from_index(reg8_from))),
-        o if o & 0b11111000 == 0b10110000 => Some(OR(r_from_index(reg8_from))),
-        o if o & 0b11111000 == 0b10101000 => Some(XOR(r_from_index(reg8_from))),
-        o if o & 0b11111000 == 0b10111000 => Some(CP(r_from_index(reg8_from))),
-        o if o & 0b11000111 == 0b00000100 => Some(INC(r_from_index(reg8_to))),
-        o if o & 0b11000111 == 0b00000101 => Some(DEC(r_from_index(reg8_to))),
-        o if o & 0b11001111 == 0b00001001 => Some(ADD(R16(HL), rr_from_index(reg16_from))),
-        o if o & 0b11001111 == 0b00000011 => Some(INC(rr_from_index(reg16_from))),
-        o if o & 0b11001111 == 0b00001011 => Some(DEC(rr_from_index(reg16_from))),
+        o if o & 0b11111000 == 0x80 => Some(ADD(R8(A), op8_from)),
+        o if o & 0b11111000 == 0x88 => Some(ADC(R8(A), op8_from)),
+        o if o & 0b11111000 == 0x90 => Some(SUB(op8_from)),
+        o if o & 0b11111000 == 0x98 => Some(SBC(op8_from)),
+        o if o & 0b11111000 == 0xa0 => Some(AND(op8_from)),
+        o if o & 0b11111000 == 0xb0 => Some(OR(op8_from)),
+        o if o & 0b11111000 == 0xa8 => Some(XOR(op8_from)),
+        o if o & 0b11111000 == 0xb8 => Some(CP(op8_from)),
+        o if o & 0b11000111 == 0x04 => Some(INC(op8_to)),
+        o if o & 0b11000111 == 0x05 => Some(DEC(op8_to)),
+        o if o & 0b11001111 == 0x09 => Some(ADD(R16(HL), op16_from)),
+        o if o & 0b11001111 == 0x03 => Some(INC(op16_from)),
+        o if o & 0b11001111 == 0x0b => Some(DEC(op16_from)),
         _ => None,
     };
 }
 
 pub(crate) fn decode_prefixed(opcode: u8) -> Option<Instr> {
-    let reg8_op = opcode & 0b111;
+    let op8 = operand8_from_index(opcode & 0b111);
 
     return match opcode {
-        0x06 => Some(RLC(AddressHL)),
-        0x16 => Some(RL(AddressHL)),
-        0x0e => Some(RRC(AddressHL)),
-        0x1e => Some(RR(AddressHL)),
-        0x26 => Some(SLA(AddressHL)),
-        0x2e => Some(SRA(AddressHL)),
-        0x3e => Some(SRL(AddressHL)),
-        o if o & 0b11111000 == 0b00000000 => Some(RLC(r_from_index(reg8_op))),
-        o if o & 0b11111000 == 0b00010000 => Some(RL(r_from_index(reg8_op))),
-        o if o & 0b11111000 == 0b00001000 => Some(RRC(r_from_index(reg8_op))),
-        o if o & 0b11111000 == 0b00011000 => Some(RR(r_from_index(reg8_op))),
-        o if o & 0b11111000 == 0b00100000 => Some(SLA(r_from_index(reg8_op))),
-        o if o & 0b11111000 == 0b00101000 => Some(SRA(r_from_index(reg8_op))),
-        o if o & 0b11111000 == 0b00111000 => Some(SRL(r_from_index(reg8_op))),
+        o if o & 0b11111000 == 0x00 => Some(RLC(op8)),
+        o if o & 0b11111000 == 0x10 => Some(RL(op8)),
+        o if o & 0b11111000 == 0x08 => Some(RRC(op8)),
+        o if o & 0b11111000 == 0x18 => Some(RR(op8)),
+        o if o & 0b11111000 == 0x20 => Some(SLA(op8)),
+        o if o & 0b11111000 == 0x28 => Some(SRA(op8)),
+        o if o & 0b11111000 == 0x38 => Some(SRL(op8)),
         _ => None,
     };
 }
