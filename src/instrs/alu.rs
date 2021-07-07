@@ -38,6 +38,7 @@ pub(crate) fn decode_unprefixed(opcode: u8) -> Option<Instr> {
 }
 
 pub(crate) fn decode_prefixed(opcode: u8) -> Option<Instr> {
+    let bit_index = (opcode >> 3) & 0b111;
     let op8 = operand8_from_index(opcode & 0b111);
 
     return match opcode {
@@ -48,6 +49,9 @@ pub(crate) fn decode_prefixed(opcode: u8) -> Option<Instr> {
         o if o & 0b11111000 == 0x20 => Some(SLA(op8)),
         o if o & 0b11111000 == 0x28 => Some(SRA(op8)),
         o if o & 0b11111000 == 0x38 => Some(SRL(op8)),
+        o if o & 0b11000000 == 0x40 => Some(BIT(BitIndex(bit_index), op8)),
+        o if o & 0b11000000 == 0xc0 => Some(SET(BitIndex(bit_index), op8)),
+        o if o & 0b11000000 == 0x80 => Some(RES(BitIndex(bit_index), op8)),
         _ => None,
     };
 }

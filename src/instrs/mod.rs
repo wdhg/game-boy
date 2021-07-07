@@ -410,4 +410,25 @@ mod should {
         assert_eq!(decode_prefixed(0x3c), SRL(R8(H)));
         assert_eq!(decode_prefixed(0x3e), SRL(AddressHL));
     }
+
+    #[test]
+    fn decode_bit_testing() {
+        assert_eq!(decode_prefixed(0x72), BIT(BitIndex(6), R8(D)));
+        assert_eq!(decode_prefixed(0x6f), BIT(BitIndex(5), R8(A)));
+        assert_eq!(decode_prefixed(0x5e), BIT(BitIndex(3), AddressHL));
+    }
+
+    #[test]
+    fn decode_bit_setting() {
+        assert_eq!(decode_prefixed(0xc3), SET(BitIndex(0), R8(E)));
+        assert_eq!(decode_prefixed(0xe5), SET(BitIndex(4), R8(L)));
+        assert_eq!(decode_prefixed(0xee), SET(BitIndex(5), AddressHL));
+    }
+
+    #[test]
+    fn decode_bit_unsetting() {
+        assert_eq!(decode_prefixed(0x81), RES(BitIndex(0), R8(C)));
+        assert_eq!(decode_prefixed(0xa2), RES(BitIndex(4), R8(D)));
+        assert_eq!(decode_prefixed(0xbe), RES(BitIndex(7), AddressHL));
+    }
 }

@@ -2,6 +2,7 @@ use crate::gameboy::{Reg16, Reg8};
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Operand {
+    BitIndex(u8),  // bit index from opcode (see BIT, SET, RES)
     R8(Reg8),      // 8 bit register
     N,             // 8 bit number following opcode
     AddressN,      // 8 bit address following opcode
@@ -59,4 +60,7 @@ pub enum Instr {
     SLA(Operand),          // shift left into carry (LSB = 0)
     SRA(Operand),          // shift right into carry (MSB constant)
     SRL(Operand),          // shift left into carry (MSB = 0)
+    BIT(Operand, Operand), // test bit in register
+    SET(Operand, Operand), // set bit in register
+    RES(Operand, Operand), // reset bit in register
 }
