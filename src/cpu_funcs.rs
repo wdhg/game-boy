@@ -1,8 +1,8 @@
-use crate::gameboy::{Flag, GameBoy, Reg8};
+use crate::gameboy::{CPUState, Flag, GameBoy, Reg8};
 use crate::instrs::instr::Operand;
 
 impl GameBoy {
-    pub fn nop(&mut self, cycle: u8) {
+    pub fn nop(&mut self) {
         return;
     }
 
@@ -10,7 +10,7 @@ impl GameBoy {
     // https://ehaskins.com/2018-01-30%20Z80%20DAA/
     // if adding: add 6 to each digit greater than 9, or if it carried
     // if subtracting: subtract 6 from each digit greater than 9, or if it carried
-    pub fn daa(&mut self, cycle: u8) {
+    pub fn daa(&mut self) {
         let value: u8 = self.read_register8(Reg8::A);
         let lower_digit: u8 = value & 0xf;
         let upper_digit: u8 = (value >> 4) & 0xf;
@@ -42,19 +42,37 @@ impl GameBoy {
         self.write_register8(Reg8::A, new_value);
     }
 
-    pub fn cpl(&mut self, cycle: u8) {}
+    pub fn cpl(&mut self) {
+        self.write_register8(Reg8::A, !self.read_register8(Reg8::A));
+    }
 
-    pub fn ccf(&mut self, cycle: u8) {}
+    pub fn ccf(&mut self) {
+        self.set_flag_to(Flag::N, false);
+        self.set_flag_to(Flag::H, false);
+        self.set_flag_to(Flag::C, !self.test_flag(Flag::C));
+    }
 
-    pub fn scf(&mut self, cycle: u8) {}
+    pub fn scf(&mut self) {
+        self.set_flag_to(Flag::N, false);
+        self.set_flag_to(Flag::H, false);
+        self.set_flag_to(Flag::C, true);
+    }
 
-    pub fn halt(&mut self, cycle: u8) {}
+    pub fn halt(&mut self) {
+        self.state = CPUState::Halted;
+    }
 
-    pub fn stop(&mut self, cycle: u8) {}
+    pub fn stop(&mut self) {
+        self.state = CPUState::Stopped;
+    }
 
-    pub fn di(&mut self, cycle: u8) {}
+    pub fn di(&mut self) {
+        self.interrupts_enabled = false;
+    }
 
-    pub fn ei(&mut self, cycle: u8) {}
+    pub fn ei(&mut self) {
+        self.interrupts_enabled = true;
+    }
 
     pub fn ld(&mut self, cycle: u8, op1: Operand, op2: Operand) {}
 

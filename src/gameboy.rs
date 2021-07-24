@@ -80,18 +80,21 @@ impl Reg16 {
     }
 }
 
-enum CPUState {
+pub enum CPUState {
     Fetch,
     FetchPrefixed,
     Excute(Instr, u64), // instruction and start cycle
+    Halted,
+    Stopped,
 }
 
 pub struct GameBoy {
     pub memory: [u8; MEMORY_SIZE],
     registers8: HashMap<Reg8, u8>,
     registers16: HashMap<Reg16, u16>,
-    state: CPUState,
-    cycle: u64, // machine cycles ()
+    pub state: CPUState,
+    pub interrupts_enabled: bool,
+    cycle: u64, // machine cycles
 }
 
 impl GameBoy {
@@ -113,6 +116,7 @@ impl GameBoy {
             },
             memory: [0; MEMORY_SIZE],
             state: CPUState::Fetch,
+            interrupts_enabled: true, // TODO check this initial state
             cycle: 0,
         };
     }
@@ -172,6 +176,8 @@ impl GameBoy {
             Fetch => self.fetch(),
             FetchPrefixed => self.fetch_prefixed(),
             Excute(instr, start_cycle) => self.execute(instr, start_cycle),
+            Halted => return,
+            Stopped => return, // TODO continue on button press
         }
 
         /*
@@ -208,15 +214,15 @@ impl GameBoy {
 
         // functions defined in cpu_funcs.rs
         match instr {
-            NOP => self.nop(cycle),
-            DAA => self.daa(cycle),
-            CPL => self.cpl(cycle),
-            CCF => self.ccf(cycle),
-            SCF => self.scf(cycle),
-            HALT => self.halt(cycle),
-            STOP => self.stop(cycle),
-            DI => self.di(cycle),
-            EI => self.ei(cycle),
+            NOP => self.nop(),
+            DAA => self.daa(),
+            CPL => self.cpl(),
+            CCF => self.ccf(),
+            SCF => self.scf(),
+            HALT => self.halt(),
+            STOP => self.stop(),
+            DI => self.di(),
+            EI => self.ei(),
             LD(op1, op2) => self.ld(cycle, op1, op2),
             LDH(op1, op2) => self.ldh(cycle, op1, op2),
             PUSH(op) => self.push(cycle, op),
