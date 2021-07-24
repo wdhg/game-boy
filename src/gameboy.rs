@@ -136,15 +136,14 @@ impl GameBoy {
             .or_default();
     }
 
-    fn set_flag(&mut self, flag: Flag) {
+    pub fn set_flag_to(&mut self, flag: Flag, value: bool) {
         let flag_bits = self.read_register8(Reg8::F);
-        let new_flag_bits = flag_bits | (1 << flag.bit());
-        self.write_register8(Reg8::F, new_flag_bits);
-    }
-
-    fn reset_flag(&mut self, flag: Flag) {
-        let flag_bits = self.read_register8(Reg8::F);
-        let new_flag_bits = flag_bits & !(1 << flag.bit());
+        let mask = 1 << flag.bit();
+        let new_flag_bits = if value {
+            flag_bits | mask // setting
+        } else {
+            flag_bits & !mask // resetting
+        };
         self.write_register8(Reg8::F, new_flag_bits);
     }
 
