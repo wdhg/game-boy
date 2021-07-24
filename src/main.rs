@@ -1,3 +1,4 @@
+mod cpu_funcs;
 mod gameboy;
 mod instrs;
 

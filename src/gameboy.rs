@@ -71,7 +71,7 @@ pub struct GameBoy {
     registers8: HashMap<Reg8, u8>,
     registers16: HashMap<Reg16, u16>,
     state: CPUState,
-    cycle: u64, // machine cycles (1Mhz)
+    cycle: u64, // machine cycles ()
 }
 
 impl GameBoy {
@@ -166,7 +166,46 @@ impl GameBoy {
     }
 
     fn execute(&mut self, instr: Instr, start_cycle: u64) {
-        return;
+        use crate::instrs::instr::Instr::*;
+
+        let cycle: u8 = (self.cycle - start_cycle) as u8;
+
+        // functions defined in cpu_funcs.rs
+        match instr {
+            NOP => self.nop(cycle),
+            DAA => self.daa(cycle),
+            CPL => self.cpl(cycle),
+            CCF => self.ccf(cycle),
+            SCF => self.scf(cycle),
+            HALT => self.halt(cycle),
+            STOP => self.stop(cycle),
+            DI => self.di(cycle),
+            EI => self.ei(cycle),
+            LD(op1, op2) => self.ld(cycle, op1, op2),
+            LDH(op1, op2) => self.ldh(cycle, op1, op2),
+            PUSH(op) => self.push(cycle, op),
+            POP(op) => self.pop(cycle, op),
+            ADD(op1, op2) => self.add(cycle, op1, op2),
+            ADC(op1, op2) => self.adc(cycle, op1, op2),
+            SUB(op) => self.sub(cycle, op),
+            SBC(op) => self.sbc(cycle, op),
+            AND(op) => self.and(cycle, op),
+            OR(op) => self.or(cycle, op),
+            XOR(op) => self.xor(cycle, op),
+            CP(op) => self.cp(cycle, op),
+            INC(op) => self.inc(cycle, op),
+            DEC(op) => self.dec(cycle, op),
+            RLC(op) => self.rlc(cycle, op),
+            RL(op) => self.rl(cycle, op),
+            RRC(op) => self.rrc(cycle, op),
+            RR(op) => self.rr(cycle, op),
+            SLA(op) => self.sla(cycle, op),
+            SRA(op) => self.sra(cycle, op),
+            SRL(op) => self.srl(cycle, op),
+            BIT(op1, op2) => self.bit(cycle, op1, op2),
+            SET(op1, op2) => self.set(cycle, op1, op2),
+            RES(op1, op2) => self.res(cycle, op1, op2),
+        }
     }
 }
 
