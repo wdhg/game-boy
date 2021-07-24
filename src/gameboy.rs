@@ -1,3 +1,4 @@
+use crate::instrs::instr::Instr;
 use std::collections::HashMap;
 
 extern crate maplit;
@@ -59,10 +60,18 @@ impl Reg16 {
     }
 }
 
+enum CPUState {
+    Fetch,
+    FetchPrefixed,
+    Excute(Instr, u64), // instruction and start cycle
+}
+
 pub struct GameBoy {
     pub memory: [u8; MEMORY_SIZE],
     registers8: HashMap<Reg8, u8>,
     registers16: HashMap<Reg16, u16>,
+    state: CPUState,
+    cycle: u64, // machine cycles (1Mhz)
 }
 
 impl GameBoy {
@@ -83,6 +92,8 @@ impl GameBoy {
                 Reg16::SP => INITIAL_SP,
             },
             memory: [0; MEMORY_SIZE],
+            state: CPUState::Fetch,
+            cycle: 0,
         };
     }
 
@@ -103,6 +114,59 @@ impl GameBoy {
             .entry(r)
             .and_modify(|e| *e = v)
             .or_default();
+    }
+
+    fn read_next_opcode(&mut self) -> u8 {
+        let pc = self.read_register16(Reg16::PC);
+        let opcode: u8 = self.memory[pc as usize];
+        self.write_register16(Reg16::PC, pc + 1);
+        self.increment_cycle();
+        return opcode;
+    }
+
+    fn increment_cycle(&mut self) {
+        self.cycle += 1;
+    }
+
+    // a single machine cycle (4 clock cycles)
+    pub fn cycle(&mut self) {
+        use CPUState::*;
+
+        match self.state {
+            Fetch => self.fetch(),
+            FetchPrefixed => self.fetch_prefixed(),
+            Excute(instr, start_cycle) => self.execute(instr, start_cycle),
+        }
+
+        /*
+         * TODO if doing last execution cycle, pre-fetch next opcode:
+         * - maybe don't call increment_cycles to emulate this? this would violate the contract that
+         *   this function is a single machine cycle
+         * - make a call to fetch()? probably more accurate to what is actually happening in
+         *   hardware
+         */
+        self.increment_cycle();
+    }
+
+    fn fetch(&mut self) {
+        use crate::instrs::{decode_unprefixed, PREFIX};
+        let opcode: u8 = self.read_next_opcode();
+
+        if opcode == PREFIX {
+            self.state = CPUState::FetchPrefixed;
+        } else {
+            self.state = CPUState::Excute(decode_unprefixed(opcode), self.cycle);
+        }
+    }
+
+    fn fetch_prefixed(&mut self) {
+        use crate::instrs::decode_prefixed;
+        let opcode: u8 = self.read_next_opcode();
+        self.state = CPUState::Excute(decode_prefixed(opcode), self.cycle);
+    }
+
+    fn execute(&mut self, instr: Instr, start_cycle: u64) {
+        return;
     }
 }
 

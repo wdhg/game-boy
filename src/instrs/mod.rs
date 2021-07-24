@@ -6,7 +6,7 @@ mod misc;
 use instr::Instr;
 
 #[allow(dead_code)]
-const PREFIX: u8 = 0xcb;
+pub const PREFIX: u8 = 0xcb;
 
 #[allow(dead_code)]
 pub fn decode_unprefixed(opcode: u8) -> Instr {
