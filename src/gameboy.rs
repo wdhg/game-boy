@@ -147,6 +147,11 @@ impl GameBoy {
         self.write_register8(Reg8::F, new_flag_bits);
     }
 
+    pub fn test_flag(&self, flag: Flag) -> bool {
+        let index = flag.bit();
+        return (self.read_register8(Reg8::F) >> index) & 1 == 1;
+    }
+
     fn read_next_opcode(&mut self) -> u8 {
         let pc = self.read_register16(Reg16::PC);
         let opcode: u8 = self.memory[pc as usize];
