@@ -8,6 +8,26 @@ const MEMORY_SIZE: usize = 0x10000;
 const INITIAL_PC: u16 = 0x100;
 const INITIAL_SP: u16 = 0xfff;
 
+enum Flag {
+    Z, // zero flag: result = 0
+    N, // subtract flag: subtraction was performed in last instruction
+    H, // half carry flag: carry from lower nibble occurred
+    C, // carry flag: carry occurred or if reg A is the smaller value when executing CP
+}
+
+impl Flag {
+    pub fn bit(&self) -> u8 {
+        use Flag::*;
+
+        match self {
+            Z => 7,
+            N => 6,
+            H => 5,
+            C => 4,
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Reg8 {
     A,
@@ -114,6 +134,18 @@ impl GameBoy {
             .entry(r)
             .and_modify(|e| *e = v)
             .or_default();
+    }
+
+    fn set_flag(&mut self, flag: Flag) {
+        let flag_bits = self.read_register8(Reg8::F);
+        let new_flag_bits = flag_bits | (1 << flag.bit());
+        self.write_register8(Reg8::F, new_flag_bits);
+    }
+
+    fn reset_flag(&mut self, flag: Flag) {
+        let flag_bits = self.read_register8(Reg8::F);
+        let new_flag_bits = flag_bits & !(1 << flag.bit());
+        self.write_register8(Reg8::F, new_flag_bits);
     }
 
     fn read_next_opcode(&mut self) -> u8 {
