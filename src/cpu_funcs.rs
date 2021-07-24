@@ -67,11 +67,11 @@ impl GameBoy {
     }
 
     pub fn di(&mut self) {
-        self.interrupts_enabled = false;
+        self.interrupt_master_enable = false;
     }
 
     pub fn ei(&mut self) {
-        self.interrupts_enabled = true;
+        self.interrupt_master_enabled = true;
     }
 
     pub fn ld(&mut self, cycle: u8, op1: Operand, op2: Operand) {}

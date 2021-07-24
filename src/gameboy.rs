@@ -93,7 +93,7 @@ pub struct GameBoy {
     registers8: HashMap<Reg8, u8>,
     registers16: HashMap<Reg16, u16>,
     pub state: CPUState,
-    pub interrupts_enabled: bool,
+    pub interrupt_master_enable: bool,
     cycle: u64, // machine cycles
 }
 
@@ -116,7 +116,7 @@ impl GameBoy {
             },
             memory: [0; MEMORY_SIZE],
             state: CPUState::Fetch,
-            interrupts_enabled: true, // TODO check this initial state
+            interrupt_master_enable: true, // TODO check this initial state
             cycle: 0,
         };
     }
