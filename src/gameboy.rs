@@ -8,7 +8,7 @@ const MEMORY_SIZE: usize = 0x10000;
 const INITIAL_PC: u16 = 0x100;
 const INITIAL_SP: u16 = 0xfff;
 
-enum Flag {
+pub enum Flag {
     Z, // zero flag: result = 0
     N, // subtract flag: subtraction was performed in last instruction
     H, // half carry flag: carry from lower nibble occurred
