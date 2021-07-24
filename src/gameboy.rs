@@ -83,7 +83,7 @@ impl GameBoy {
                 Reg8::C => 0,
                 Reg8::D => 0,
                 Reg8::E => 0,
-                Reg8::F => 0,
+                Reg8::F => 0, // flag register with bits: ZNHC0000
                 Reg8::H => 0,
                 Reg8::L => 0,
             },
