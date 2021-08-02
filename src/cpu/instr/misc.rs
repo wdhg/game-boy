@@ -1,6 +1,6 @@
 use super::instr::{Instr, Instr::*};
 
-pub(crate) fn decode(opcode: u8) -> Option<Instr> {
+pub(crate) fn decode_unprefixed(opcode: u8) -> Option<Instr> {
     return match opcode {
         0x00 => Some(NOP),
         0x10 => Some(STOP),

@@ -1,7 +1,5 @@
-mod cpu_funcs;
+mod cpu;
 mod gameboy;
-mod instrs;
-mod special_registers;
 
 use gameboy::GameBoy;
 
