@@ -14,10 +14,8 @@ pub enum Instr {
     LD(Op8, Op8),      // load instruction
     LD16(Op16, Op16),  // 16 bit load instruction
     LDH(Op8, Op8),     // half* load instruction (*half of 16 bit reg)
-    PUSH(Op8),         // push instruction
-    PUSH16(Op16),      // bit push instruction
-    POP(Op8),          // pop instruction
-    POP16(Op16),       // 16 bit pop instruction
+    PUSH(Op16),        // bit push instruction
+    POP(Op16),         // 16 bit pop instruction
     ADD(Op8, Op8),     // add instruction
     ADD16(Op16, Op16), // 16 bit add instruction
     ADC(Op8, Op8),     // add with carry instruction

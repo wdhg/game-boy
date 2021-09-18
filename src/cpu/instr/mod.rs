@@ -140,19 +140,19 @@ mod should {
     #[test]
     fn decode_pushing_16_bit_register() {
         // PUSH rr
-        assert_eq!(decode_unprefixed(0xc5), PUSH16(Op16::Reg(BC)));
-        assert_eq!(decode_unprefixed(0xd5), PUSH16(Op16::Reg(DE)));
-        assert_eq!(decode_unprefixed(0xe5), PUSH16(Op16::Reg(HL)));
-        assert_eq!(decode_unprefixed(0xf5), PUSH16(Op16::Reg(SP)));
+        assert_eq!(decode_unprefixed(0xc5), PUSH(Op16::Reg(BC)));
+        assert_eq!(decode_unprefixed(0xd5), PUSH(Op16::Reg(DE)));
+        assert_eq!(decode_unprefixed(0xe5), PUSH(Op16::Reg(HL)));
+        assert_eq!(decode_unprefixed(0xf5), PUSH(Op16::Reg(SP)));
     }
 
     #[test]
     fn decode_popping_16_bit_register() {
         // POP rr
-        assert_eq!(decode_unprefixed(0xc1), POP16(Op16::Reg(BC)));
-        assert_eq!(decode_unprefixed(0xd1), POP16(Op16::Reg(DE)));
-        assert_eq!(decode_unprefixed(0xe1), POP16(Op16::Reg(HL)));
-        assert_eq!(decode_unprefixed(0xf1), POP16(Op16::Reg(SP)));
+        assert_eq!(decode_unprefixed(0xc1), POP(Op16::Reg(BC)));
+        assert_eq!(decode_unprefixed(0xd1), POP(Op16::Reg(DE)));
+        assert_eq!(decode_unprefixed(0xe1), POP(Op16::Reg(HL)));
+        assert_eq!(decode_unprefixed(0xf1), POP(Op16::Reg(SP)));
     }
 
     #[test]

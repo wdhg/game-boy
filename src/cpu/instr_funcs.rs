@@ -80,13 +80,9 @@ impl CPU {
 
     pub fn ldh(&mut self, cycle: u8, op1: Op8, op2: Op8) {}
 
-    pub fn push(&mut self, cycle: u8, op: Op8) {}
+    pub fn push(&mut self, cycle: u8, op: Op16) {}
 
-    pub fn push16(&mut self, cycle: u8, op: Op16) {}
-
-    pub fn pop(&mut self, cycle: u8, op: Op8) {}
-
-    pub fn pop16(&mut self, cycle: u8, op: Op16) {}
+    pub fn pop(&mut self, cycle: u8, op: Op16) {}
 
     pub fn add(&mut self, cycle: u8, op1: Op8, op2: Op8) {}
 

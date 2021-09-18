@@ -30,8 +30,8 @@ pub(crate) fn decode_unprefixed(opcode: u8) -> Option<Instr> {
         o if o & 0b11000111 == 0x06 => Some(LD(op8_to, Op8::N)),
         o if o & 0b11000000 == 0x40 => Some(LD(op8_to, op8_from)),
         o if o & 0b11001111 == 0x01 => Some(LD16(op16, Op16::NN)),
-        o if o & 0b11001111 == 0xc5 => Some(PUSH16(op16)),
-        o if o & 0b11001111 == 0xc1 => Some(POP16(op16)),
+        o if o & 0b11001111 == 0xc5 => Some(PUSH(op16)),
+        o if o & 0b11001111 == 0xc1 => Some(POP(op16)),
         _ => None,
     };
 }
